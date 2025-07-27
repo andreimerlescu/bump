@@ -1,0 +1,8 @@
+.idea/
+.vscode/
+summaries/
+bin/
+*.log
+backups/
+.DS_Store
+analysis/

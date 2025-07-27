@@ -31,7 +31,7 @@ $(BIN_DIR):
 
 .PHONY: all clean summary install app-binary
 
-all: summary darwin-amd64 darwin-arm64 linux-amd64 linux-arm64 windows-amd64 install
+all: test summary darwin-amd64 darwin-arm64 linux-amd64 linux-arm64 windows-amd64 install
 
 clean:
 	@rm -rf $(BIN_DIR)
@@ -60,7 +60,7 @@ install: $(BIN_DIR)
 	else \
 		cp "$(BIN_DIR)/$(APP_NAME)-$(shell go env GOOS)-$(shell go env GOARCH)" "$(shell go env GOBIN)/$(APP_NAME)"; \
 	fi
-	@echo "NEW: $(shell which $(APP_NAME))"
+	@echo "INSTALLED: $(shell which $(APP_NAME))"
 
 .PHONY: darwin-amd64 darwin-amd64 linux-amd64 linux-arm64 windows-amd64
 

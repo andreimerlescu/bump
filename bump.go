@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -22,6 +23,7 @@ var (
 	beta        = flag.Bool("beta", false, "beta version bump")
 	rc          = flag.Bool("rc", false, "rc version bump")
 	preview     = flag.Bool("preview", false, "preview version bump")
+	useJson     = flag.Bool("json", false, "use json version bump")
 	showVersion = flag.Bool("v", false, "show version")
 	writeInput  = flag.Bool("write", false, "writeInput version file")
 	checkFile   = flag.Bool("check", false, "check version file")
@@ -37,7 +39,11 @@ func main() {
 	check(version.ParseFile(*inputFile))
 	originalVersion := version.Raw()
 	if *checkFile {
-		fmt.Printf("%s\n", originalVersion)
+		if *useJson {
+			fmt.Printf(`{"version": "%s"}`, originalVersion)
+		} else {
+			fmt.Printf("%s\n", originalVersion)
+		}
 		os.Exit(0)
 	}
 
@@ -46,17 +52,29 @@ func main() {
 
 	if *major {
 		version.BumpMajor()
-	} else if *minor {
+	}
+
+	if *minor {
 		version.BumpMinor()
-	} else if *patch {
+	}
+
+	if *patch {
 		version.BumpPatch()
-	} else if *rc {
+	}
+
+	if *rc {
 		version.BumpRC()
-	} else if *beta {
+	}
+
+	if *beta {
 		version.BumpBeta()
-	} else if *alpha {
+	}
+
+	if *alpha {
 		version.BumpAlpha()
-	} else if *preview {
+	}
+
+	if *preview {
 		version.BumpPreview()
 	}
 
@@ -66,16 +84,40 @@ func main() {
 	if wasBumped {
 		if *writeInput {
 			check(version.Save(*inputFile))
-			fmt.Printf("Bumped %s → %s (saved to %s)\n", originalVersion, newVersion, *inputFile)
+			if *useJson {
+				output, err := json.MarshalIndent(version, "", "  ")
+				check(err)
+				fmt.Println(string(output))
+			} else {
+				fmt.Printf("Bumped %s → %s (saved to %s)\n", originalVersion, newVersion, *inputFile)
+			}
 		} else {
-			fmt.Printf("Bumped %s → %s\n", originalVersion, newVersion)
+			if *useJson {
+				output, err := json.MarshalIndent(version, "", "  ")
+				check(err)
+				fmt.Println(string(output))
+			} else {
+				fmt.Printf("Bumped %s → %s\n", originalVersion, newVersion)
+			}
 		}
 	} else if *writeInput {
 		check(version.Save(*inputFile))
-		fmt.Printf("Re-saved version %s to %s\n", newVersion, *inputFile)
+		if *useJson {
+			output, err := json.MarshalIndent(version, "", "  ")
+			check(err)
+			fmt.Println(string(output))
+		} else {
+			fmt.Printf("Re-saved version %s to %s\n", newVersion, *inputFile)
+		}
 	} else if bumpFlags == 0 && !*checkFile && !*writeInput {
-		fmt.Println("No bump operation specified. Use -major, -minor, -patch, etc. to bump the version.")
-		fmt.Printf("Current version is: %s\n", originalVersion)
+		if *useJson {
+			output, err := json.MarshalIndent(version, "", "  ")
+			check(err)
+			fmt.Println(string(output))
+		} else {
+			fmt.Println("No bump operation specified. Use -major, -minor, -patch, etc. to bump the version.")
+			fmt.Printf("Current version is: %s\n", originalVersion)
+		}
 	}
 
 }

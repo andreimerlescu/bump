@@ -41,7 +41,8 @@ summary:
 	@if ! command -v summarize > /dev/null; then \
 		go install github.com/andreimerlescu/summarize@latest; \
 	fi
-	@summarize -i "go,Makefile,md,mod,sum,LICENSE,gitignore"
+	@summarize -i "go,Makefile,md,mod,sum,LICENSE,gitignore" \
+			   -s "summary.,.min.js,.min.css,.git/,.svn/,.vscode/,.vs/,.idea/,logs/,secrets/,summaries/,bin/"
 
 app-binary: $(BIN_DIR)
 	@printf "Building binary target: %s/%s\n" "${GOOS}" "${GOARCH}"

@@ -2,6 +2,19 @@
 
 This package is designed to take a string, like `v1.0.0` and allow you to `bump` it with the command line.
 
+### Version Format Priority
+
+The `bump` package can parse multiple version formats. To ensure accuracy, it checks for formats in a specific order, from most complex to least complex. This prevents a detailed pre-release version from being incorrectly identified as a simpler one.
+
+The priority is as follows:
+
+1.  `v1.2.3-beta.4-alpha.5` (Beta with Alpha)
+2.  `v1.2.3-alpha.1` (Alpha)
+3.  `v1.2.3-beta.2` (Beta)
+4.  `v1.2.3-rc.1` (Release Candidate)
+5.  `v1.2.3-preview.7` (Preview)
+6.  `v1.2.3` (Standard)
+
 ## Installation
 
 ```bash
@@ -54,6 +67,8 @@ Usage of bump:
         check version file
   -in string
         input file (default "VERSION")
+  -json
+        use json version bump
   -major
         major version bump
   -minor
@@ -66,7 +81,7 @@ Usage of bump:
         rc version bump
   -v    show version
   -write
-        writeInput version file
+        writeInput version filee
 ```
 
 ## Examples

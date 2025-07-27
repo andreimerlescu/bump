@@ -11,7 +11,7 @@ import (
 	"github.com/andreimerlescu/bump/bump"
 )
 
-const BinaryVersion = "v1.0.0-beta.1"
+const BinaryVersion = "v1.0.0"
 
 var (
 	inputFile   = flag.String("in", filepath.Join(".", "VERSION"), "input file")

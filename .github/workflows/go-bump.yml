@@ -1,0 +1,56 @@
+name: Go Test Bump
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.5'
+
+      - name: Run all tests via Makefile
+        id: run-tests
+        run: make test || true
+
+      - name: Display Unit Test Results
+        if: always()
+        run: |
+          echo "========================================="
+          echo "📄 Unit Test Results"
+          echo "========================================="
+          cat test-results/results.unit.md || echo "Unit test result file not found."
+          echo ""
+
+      - name: Display Benchmark Test Results
+        if: always()
+        run: |
+          echo "========================================="
+          echo "🚀 Benchmark Test Results"
+          echo "========================================="
+          cat test-results/results.benchmark.md || echo "Benchmark test result file not found."
+          echo ""
+
+      - name: Display Fuzz Test Results
+        if: always()
+        run: |
+          echo "========================================="
+          echo "🔬 Fuzz Test Results"
+          echo "========================================="
+          cat test-results/results.fuzz.md || echo "Fuzz test result file not found."
+          echo ""
+
+      - name: Check for test failures
+        if: steps.run-tests.outcome == 'failure'
+        run: |
+          echo "Tests failed. See logs above for details."
+          exit 1

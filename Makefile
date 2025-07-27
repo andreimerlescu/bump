@@ -41,7 +41,7 @@ summary:
 	@if ! command -v summarize > /dev/null; then \
 		go install github.com/andreimerlescu/summarize@latest; \
 	fi
-	@summarize -i "go,Makefile,md,mod,sum"
+	@summarize -i "go,Makefile,md,mod,sum,LICENSE,gitignore"
 
 app-binary: $(BIN_DIR)
 	@printf "Building binary target: %s/%s\n" "${GOOS}" "${GOARCH}"
@@ -90,41 +90,49 @@ test: test-unit test-bench test-fuzz
 test-unit: $(TEST_DIR)
 	@printf "%s" "Testing Unit... "
 	@touch $(UNIT_LOG)
-	@echo "# \`$(UNIT_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(UNIT_LOG)
-	@SECONDS=0
-	@{ cd $(PACKAGE_PATH) && go test -vet=all -count=1 ./... >> $(UNIT_LOG); }
-	@if [ $? == 1 ]; then \
+	@echo "## \`$(UNIT_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(UNIT_LOG)
+	@start_time=$$(date +%s); \
+	cd $(PACKAGE_PATH) && go test -vet=all -count=1 ./... >> $(UNIT_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
 		echo "FAILED!"; \
 		exit 1; \
-	fi
-	@echo "\`\`\`" >> $(UNIT_LOG)
-	@echo "" >> $(UNIT_LOG)
-	@echo "SUCCESS! Took $$SECONDS (s)! Wrote $(shell basename "$(UNIT_LOG)") ( size: $(shell du -h "$(UNIT_LOG)" | awk '{print $$1}') )"
+	fi; \
+	echo "\`\`\`" >> $(UNIT_LOG); \
+	echo "" >> $(UNIT_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(UNIT_LOG)") ( size: $(shell du -h "$(UNIT_LOG)" | awk '{print $$1}') )"
 
 test-fuzz: $(TEST_DIR)
 	@printf "%s" "Testing Fuzz... "
 	@touch $(FUZZ_LOG)
-	@echo "# \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
-	@SECONDS=0
-	@{ cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=30s >> "$(FUZZ_LOG)"; }
-	@if [ $? == 1 ]; then \
+	@echo "## \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
+	@start_time=$$(date +%s); \
+	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=31s >> $(FUZZ_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
 		echo "FAILED!"; \
 		exit 1; \
-	fi
-	@echo "\`\`\`" >> $(FUZZ_LOG)
-	@echo "" >> $(FUZZ_LOG)
-	@echo "SUCCESS! Took $$SECONDS (s)! Wrote $(shell basename "$(FUZZ_LOG)") ( size: $(shell du -h "$(FUZZ_LOG)" | awk '{print $$1}') )"
+	fi; \
+	echo "\`\`\`" >> $(FUZZ_LOG); \
+	echo "" >> $(FUZZ_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(FUZZ_LOG)") ( size: $(shell du -h "$(FUZZ_LOG)" | awk '{print $$1}') )"
 
 test-bench: $(TEST_DIR)
 	@printf "%s" "Testing Benchmark... "
-	@echo "# \`$(BENCH_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(BENCH_LOG)
-	@SECONDS=0
-	@{ cd $(PACKAGE_PATH) && go test -vet=all -count=1 -bench=.  >> "$(BENCH_LOG)"; }
-	@if [ $? == 1 ]; then \
+	@echo "## \`$(BENCH_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(BENCH_LOG)
+	@start_time=$$(date +%s); \
+	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -bench=.  >> $(BENCH_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
 		echo "FAILED!"; \
 		exit 1; \
-	fi
-	@echo "\`\`\`" >> $(BENCH_LOG)
-	@echo "" >> $(BENCH_LOG)
-	@echo "SUCCESS! Took $$SECONDS (s)! Wrote $(shell basename "$(BENCH_LOG)") ( size: $(shell du -h "$(BENCH_LOG)" | awk '{print $$1}') )"
-
+	fi; \
+	echo "\`\`\`" >> $(BENCH_LOG); \
+	echo "" >> $(BENCH_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(BENCH_LOG)") ( size: $(shell du -h "$(BENCH_LOG)" | awk '{print $$1}') )"

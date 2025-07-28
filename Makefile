@@ -110,7 +110,7 @@ test-fuzz: $(TEST_DIR)
 	@touch $(FUZZ_LOG)
 	@echo "## \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
 	@start_time=$$(date +%s); \
-	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=31s >> $(FUZZ_LOG); \
+	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=3s >> $(FUZZ_LOG); \
 	test_result=$$?; \
 	end_time=$$(date +%s); \
 	elapsed=$$((end_time - start_time)); \

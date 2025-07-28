@@ -8,13 +8,14 @@ import (
 
 type Version struct {
 	raw     []byte
-	Major   int
-	Minor   int
-	Patch   int
-	Alpha   int
-	Beta    int
-	RC      int
-	Preview int
+	Major   int    `json:"major"`
+	Minor   int    `json:"minor"`
+	Patch   int    `json:"patch"`
+	Alpha   int    `json:"alpha"`
+	Beta    int    `json:"beta"`
+	RC      int    `json:"rc"`
+	Preview int    `json:"preview"`
+	Version string `json:"version"`
 }
 
 // Version formats
@@ -26,6 +27,15 @@ const (
 	TypeE string = "v%d.%d.%d-beta.%d-alpha.%d"
 	TypeF string = "v%d.%d.%d-preview.%d"
 )
+
+var Priority = map[int]string{
+	0: TypeE,
+	1: TypeB,
+	2: TypeC,
+	3: TypeD,
+	4: TypeF,
+	5: TypeA,
+}
 
 // Types is a map of format strings to the expected number of scanned items.
 var Types = map[string]int{TypeA: 3, TypeB: 4, TypeC: 4, TypeD: 4, TypeE: 5, TypeF: 4}

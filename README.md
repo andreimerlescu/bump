@@ -59,12 +59,16 @@ curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.0.0/bump.ex
 
 ```bash
 Usage of bump:
+  -about
+        show about
   -alpha
         alpha version bump
   -beta
         beta version bump
   -check
         check version file
+  -env
+        show env
   -in string
         input file (default "VERSION")
   -json
@@ -79,9 +83,11 @@ Usage of bump:
         preview version bump
   -rc
         rc version bump
+  -set string
+        set env to new value
   -v    show version
   -write
-        writeInput version filee
+        writeInput version file
 ```
 
 ## About
@@ -139,6 +145,22 @@ It may be useful to enable to this on your environment.
 By disabling options like `BUMP_NO_ALPHA_BETA`, you can avoid having versions in your history that look like 
 `v1.0.1-beta.3-alpha-3` from getting into your pipelines due to any invocations that combine the allowed `-beta` and 
 `-alpha` flags during runtime.
+
+You can use the `-env` argument to show results of the environment: 
+
+```bash
+bump -env
+```
+
+```log
+BUMP_NO_RC=false
+BUMP_NO_PREVIEW=false
+BUMP_DEFAULT_INPUT=VERSION
+BUMP_ALWAYS_WRITE=false
+BUMP_NO_ALPHA=false
+BUMP_NO_BETA=false
+BUMP_NO_ALPHA_BETA=false
+```
 
 ## Examples
 

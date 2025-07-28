@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	BinaryVersion = "v1.0.2"
+	BinaryVersion = "v1.0.3"
 
 	envAlwaysWrite  = "BUMP_ALWAYS_WRITE"
 	envDefaultInput = "BUMP_DEFAULT_INPUT"
@@ -29,6 +29,8 @@ var (
 	initialInputFile = filepath.Join(".", "VERSION")
 
 	showAbout    bool
+	showEnv      bool
+	setEnvVal    string
 	major        bool
 	minor        bool
 	patch        bool
@@ -62,13 +64,7 @@ func about() {
 	out.WriteString("Defaults: \n")
 	out.WriteString(fmt.Sprintf("  -in=%s [default: %s]\n", inputFile, defaultInput))
 	out.WriteString("Environment Variables:\n")
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envAlwaysWrite, strconv.FormatBool(alwaysWrite)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envDefaultInput, os.Getenv(envDefaultInput)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envNoBeta, strconv.FormatBool(noBeta)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envNoAlpha, strconv.FormatBool(noAlpha)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envNoAlphaBeta, strconv.FormatBool(noAlphaBeta)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envNoRC, strconv.FormatBool(noRC)))
-	out.WriteString(fmt.Sprintf("  ENV[%s]=%s\n", envNoPreview, strconv.FormatBool(noPreview)))
+	out.WriteString(env("  "))
 	out.WriteString("ORDER | Format\n")
 	out.WriteString("------|------------------------------\n")
 	for p := 0; p < len(bump.Priority); p++ {
@@ -129,9 +125,11 @@ func main() {
 }
 
 func config() {
-	defaultInput = env(envDefaultInput, initialInputFile)
+	defaultInput = envVal(envDefaultInput, initialInputFile)
 	flag.StringVar(&inputFile, "in", defaultInput, "input file")
 	flag.BoolVar(&showAbout, "about", false, "show about")
+	flag.BoolVar(&showEnv, "env", false, "show env")
+	flag.StringVar(&setEnvVal, "set", "", "set env to new value")
 	flag.BoolVar(&major, "major", false, "major version bump")
 	flag.BoolVar(&minor, "minor", false, "minor version bump")
 	flag.BoolVar(&patch, "patch", false, "patch version bump")
@@ -152,6 +150,10 @@ func config() {
 	noPreview = envIs(envNoPreview)
 	if showVersion {
 		fmt.Println(BinaryVersion)
+		os.Exit(0)
+	}
+	if showEnv {
+		fmt.Println(env(""))
 		os.Exit(0)
 	}
 	if showAbout {
@@ -265,7 +267,23 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 
 }
 
-func env(name, fallback string) string {
+func env(indent string) string {
+	var out strings.Builder
+	for e, v := range map[string]string{
+		envAlwaysWrite:  strconv.FormatBool(alwaysWrite),
+		envDefaultInput: defaultInput,
+		envNoAlpha:      strconv.FormatBool(noAlpha),
+		envNoBeta:       strconv.FormatBool(noBeta),
+		envNoAlphaBeta:  strconv.FormatBool(noAlphaBeta),
+		envNoRC:         strconv.FormatBool(noRC),
+		envNoPreview:    strconv.FormatBool(noPreview),
+	} {
+		out.WriteString(fmt.Sprintf("%s%s=%s\n", indent, e, envVal(e, v)))
+	}
+	return out.String()
+}
+
+func envVal(name, fallback string) string {
 	v, ok := os.LookupEnv(name)
 	if !ok {
 		return fallback

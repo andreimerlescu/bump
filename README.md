@@ -84,6 +84,62 @@ Usage of bump:
         writeInput version filee
 ```
 
+## About
+
+```bash
+bump -about
+```
+
+```log
+Bump Version: v1.0.2
+Usage:
+  bump -check
+  bump -[major|minor|patch|alpha|beta|rc|preview]
+  bump -[major|minor|patch|alpha|beta|rc|preview] -write
+  bump -json -[major|minor|patch|alpha|beta|rc|preview]
+  bump -json -[major|minor|patch|alpha|beta|rc|preview] -write
+Defaults: 
+  -in=VERSION [default: VERSION]
+Environment Variables:
+  ENV[BUMP_ALWAYS_WRITE]=false
+  ENV[BUMP_DEFAULT_INPUT]=
+  ENV[BUMP_NO_BETA]=false
+  ENV[BUMP_NO_ALPHA]=false
+  ENV[BUMP_NO_ALPHA_BETA]=false
+  ENV[BUMP_NO_RC]=false
+  ENV[BUMP_NO_PREVIEW]=false
+ORDER | Format
+------|------------------------------
+    0 | v%d.%d.%d-beta.%d-alpha.%d
+    1 | v%d.%d.%d-alpha.%d
+    2 | v%d.%d.%d-beta.%d
+    3 | v%d.%d.%d-rc.%d
+    4 | v%d.%d.%d-preview.%d
+    5 | v%d.%d.%d
+```
+
+## Environment
+
+You can use your **Environment Variables** to control the default runtime of the `bump` application. 
+
+| `ENV`                |   Type   | Default   | Action                                                                   | 
+|----------------------|:--------:|-----------|--------------------------------------------------------------------------|
+| `BUMP_ALWAYS_WRITE`  |  `Bool`  | `false`   | When `true`, `-write` is `true` automatically and `-in` gets modified.   |
+| `BUMP_DEFAULT_INPUT` | `String` | `<blank>` | When defined, a path to your default `VERSION` file should be used here. |
+| `BUMP_NO_BETA`       |  `Bool`  | `false`   | When `true`, `-beta` will have no effect.                                |
+| `BUMP_NO_ALPHA`      |  `Bool`  | `false`   | When `true`, `-alpha` will have no effect.                               |
+| `BUMP_NO_ALPHA_BETA` |  `Bool`  | `false`   | When `true`, `-alpha` and `-beta` will have no effect.                   | 
+| `BUMP_NO_RC`         |  `Bool`  | `false`   | When `true`, `-rc` will have no effect.                                  | 
+| `BUMP_NO_PREVIEW`    |  `Bool`  | `false`   | When `true`, `-preview` will have no effect.                             |
+
+It may be useful to enable to this on your environment. 
+
+> *NOTE*: The `-json` mode _does NOT_ write to the `-in` file as JSON, but as plain text.
+
+By disabling options like `BUMP_NO_ALPHA_BETA`, you can avoid having versions in your history that look like 
+`v1.0.1-beta.3-alpha-3` from getting into your pipelines due to any invocations that combine the allowed `-beta` and 
+`-alpha` flags during runtime.
+
 ## Examples
 
 ### Bumping Patch 

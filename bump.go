@@ -19,7 +19,7 @@ const (
 	envAlwaysWrite  = "BUMP_ALWAYS_WRITE"
 	envDefaultInput = "BUMP_DEFAULT_INPUT"
 	envNoAlphaBeta  = "BUMP_NO_ALPHA_BETA"
-	envNoAlpha      = "BUMP_NO_ALPHA_BETA"
+	envNoAlpha      = "BUMP_NO_ALPHA"
 	envNoBeta       = "BUMP_NO_BETA"
 	envNoRC         = "BUMP_NO_RC"
 	envNoPreview    = "BUMP_NO_PREVIEW"

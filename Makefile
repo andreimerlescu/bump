@@ -80,7 +80,7 @@ linux-amd64: $(BIN_DIR) summary
 windows-amd64: $(BIN_DIR) summary
 	@GOOS=windows GOARCH=amd64 $(MAKE) app-binary
 
-.PHONY: test test-unit test-fuzz test-bench
+.PHONY: test test-unit test-fuzz test-fuzz-long test-bench
 
 UNIT_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.unit.md"
 FUZZ_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.fuzz.md"
@@ -91,7 +91,7 @@ test: test-unit test-bench test-fuzz
 test-unit: $(TEST_DIR)
 	@printf "%s" "Testing Unit... "
 	@touch $(UNIT_LOG)
-	@echo "## \`$(UNIT_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(UNIT_LOG)
+	@echo "### \`$(UNIT_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(UNIT_LOG)
 	@start_time=$$(date +%s); \
 	cd $(PACKAGE_PATH) && go test -vet=all -count=1 ./... >> $(UNIT_LOG); \
 	test_result=$$?; \
@@ -108,7 +108,7 @@ test-unit: $(TEST_DIR)
 test-fuzz: $(TEST_DIR)
 	@printf "%s" "Testing Fuzz... "
 	@touch $(FUZZ_LOG)
-	@echo "## \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
+	@echo "### \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
 	@start_time=$$(date +%s); \
 	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=3s >> $(FUZZ_LOG); \
 	test_result=$$?; \
@@ -124,7 +124,7 @@ test-fuzz: $(TEST_DIR)
 
 test-bench: $(TEST_DIR)
 	@printf "%s" "Testing Benchmark... "
-	@echo "## \`$(BENCH_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(BENCH_LOG)
+	@echo "### \`$(BENCH_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(BENCH_LOG)
 	@start_time=$$(date +%s); \
 	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -bench=.  >> $(BENCH_LOG); \
 	test_result=$$?; \
@@ -137,3 +137,21 @@ test-bench: $(TEST_DIR)
 	echo "\`\`\`" >> $(BENCH_LOG); \
 	echo "" >> $(BENCH_LOG); \
 	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(BENCH_LOG)") ( size: $(shell du -h "$(BENCH_LOG)" | awk '{print $$1}') )"
+
+test-fuzz-long: $(TEST_DIR)
+	@printf "%s" "Testing Fuzz... "
+	@touch $(FUZZ_LOG)
+	@echo "### \`$(FUZZ_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(FUZZ_LOG)
+	@start_time=$$(date +%s); \
+	cd $(PACKAGE_PATH) && go test -vet=all -count=1 -fuzz=Fuzz -fuzztime=33s >> $(FUZZ_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
+		echo "FAILED!"; \
+		exit 1; \
+	fi; \
+	echo "\`\`\`" >> $(FUZZ_LOG); \
+	echo "" >> $(FUZZ_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(FUZZ_LOG)") ( size: $(shell du -h "$(FUZZ_LOG)" | awk '{print $$1}') )"
+

@@ -222,6 +222,12 @@ file.
 
 ```bash
 make test
+# OR
+make test-unit
+make test-bench
+make test-fuzz      # 3s run
+# and not part of `make test`
+make test-fuzz-long # 30s run
 ```
 
 ```log
@@ -229,4 +235,30 @@ Testing Unit... SUCCESS! Took 1 (s)! Wrote results.unit.md ( size: 4.0K )
 Testing Benchmark... SUCCESS! Took 2 (s)! Wrote results.benchmark.md ( size: 4.0K )
 Testing Fuzz... SUCCESS! Took 33 (s)! Wrote results.fuzz.md ( size: 4.0K )
 ```
+
+### Results
+
+### `/Users/andrei/work/bump/test-results/results.fuzz.md`
+
+Test results captured at 2025-07-28 07:53:25.
+
+```log
+fuzz: elapsed: 0s, gathering baseline coverage: 0/182 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 182/182 completed, now fuzzing with 14 workers
+fuzz: elapsed: 3s, execs: 657266 (219012/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 6s, execs: 1147687 (163521/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 9s, execs: 1543842 (132017/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 12s, execs: 1724503 (60219/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 15s, execs: 1798638 (24712/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 18s, execs: 1840749 (14037/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 21s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 24s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 27s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 30s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 33s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+fuzz: elapsed: 34s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+PASS
+ok  	github.com/andreimerlescu/bump/bump	34.297s
+```
+
 

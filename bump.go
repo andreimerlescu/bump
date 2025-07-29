@@ -14,8 +14,12 @@ import (
 	"github.com/andreimerlescu/bump/bump"
 )
 
+type result struct {
+	Version string `json:"version"`
+}
+
 const (
-	BinaryVersion = "v1.0.4"
+	BinaryVersion = "v1.0.4-beta.1"
 
 	envAlwaysWrite  = "BUMP_ALWAYS_WRITE"
 	envDefaultInput = "BUMP_DEFAULT_INPUT"
@@ -35,38 +39,76 @@ var (
 
 	initialInputFile = filepath.Join(".", "VERSION")
 
-	showAbout    bool
-	showEnv      bool
 	setEnvVal    string
-	major        bool
-	minor        bool
-	patch        bool
-	alpha        bool
-	beta         bool
-	rc           bool
-	preview      bool
-	useJson      bool
-	showVersion  bool
-	writeInput   bool
-	checkFile    bool
-	inputFile    string
 	defaultInput string
-	shouldFix    bool
-	gomod        bool
-	neverFix     bool
-	noAlphaBeta  bool
-	noAlpha      bool
-	noBeta       bool
-	noRC         bool
-	noPreview    bool
+	inputFile    string
+
+	showAbout   bool
+	showEnv     bool
+	gomod       bool
+	showVersion bool
+	major       bool
+	neverFix    bool
+	minor       bool
+	noAlpha     bool
+	noBeta      bool
+	noRC        bool
+	noPreview   bool
+	patch       bool
+	alpha       bool
+	beta        bool
+	rc          bool
+	shouldFix   bool
+	preview     bool
+	checkFile   bool
+	noAlphaBeta bool
+	useJson     bool
+	writeInput  bool
 )
+
+func appEnv(indent string) string {
+	var out strings.Builder
+	for e, v := range map[string]string{
+		envAlwaysWrite:  strconv.FormatBool(envIs(envAlwaysWrite)),
+		envDefaultInput: envVal(envDefaultInput, defaultInput),
+		envNeverFix:     strconv.FormatBool(envIs(envNeverFix)),
+		envNoAlpha:      strconv.FormatBool(envIs(envNoAlpha)),
+		envNoBeta:       strconv.FormatBool(envIs(envNoBeta)),
+		envNoAlphaBeta:  strconv.FormatBool(envIs(envNoAlphaBeta)),
+		envNoRC:         strconv.FormatBool(envIs(envNoRC)),
+		envNoPreview:    strconv.FormatBool(envIs(envNoPreview)),
+	} {
+		out.WriteString(fmt.Sprintf("%s%s=%s\n", indent, e, envVal(e, v)))
+	}
+	return out.String()
+}
+
+func envIs(name string) bool {
+	v, ok := os.LookupEnv(name)
+	if !ok {
+		return false
+	}
+	vb, err := strconv.ParseBool(v)
+	if err != nil {
+		return false
+	}
+	return vb
+}
+
+func envVal(name, fallback string) string {
+	v, ok := os.LookupEnv(name)
+	if !ok {
+		return fallback
+	}
+	return v
+}
 
 func about() {
 	var out strings.Builder
 	out.WriteString("Bump Version: " + BinaryVersion + "\n")
 	out.WriteString("Usage:\n")
 	out.WriteString("  bump -fix [-write] [-in=FILE]\n")
-	out.WriteString("  bump -fix -gomod [-write] [-in=go.mod]\n")
+	out.WriteString("  bump -fix -gomod [-write] [-in=go.fixGoMod]\n")
 	out.WriteString("  bump -check\n")
 	out.WriteString("  bump -[major|minor|patch|alpha|beta|rc|preview]\n")
 	out.WriteString("  bump -[major|minor|patch|alpha|beta|rc|preview] -write\n")
@@ -75,7 +117,7 @@ func about() {
 	out.WriteString("Defaults: \n")
 	out.WriteString(fmt.Sprintf("  -in=%s [default: %s]\n", inputFile, defaultInput))
 	out.WriteString("Environment Variables:\n")
-	out.WriteString(env("  "))
+	out.WriteString(appEnv("  "))
 	out.WriteString("ORDER | Format\n")
 	out.WriteString("------|------------------------------\n")
 	for p := 0; p < len(bump.Priority); p++ {
@@ -94,7 +136,7 @@ func main() {
 	config()
 
 	if gomod {
-		handleGoMod()
+		fixGoMod()
 		return
 	}
 
@@ -117,7 +159,7 @@ func main() {
 			originalContent = []byte(version.Raw())
 		}
 
-		fixedContent, fixErr := correct(originalContent)
+		fixedContent, fixErr := correctContents(originalContent)
 		if fixErr != nil {
 			_, _ = fmt.Fprintln(os.Stderr, fixErr.Error())
 			os.Exit(1)
@@ -177,8 +219,8 @@ func config() {
 	defaultInput = envVal(envDefaultInput, initialInputFile)
 	flag.StringVar(&inputFile, "in", defaultInput, "input file")
 	flag.BoolVar(&showAbout, "about", false, "show about")
-	flag.BoolVar(&showEnv, "env", false, "show env")
-	flag.StringVar(&setEnvVal, "set", "", "set env to new value")
+	flag.BoolVar(&showEnv, "appEnv", false, "show appEnv")
+	flag.StringVar(&setEnvVal, "set", "", "set appEnv to new value")
 	flag.BoolVar(&major, "major", false, "major version bump")
 	flag.BoolVar(&minor, "minor", false, "minor version bump")
 	flag.BoolVar(&patch, "patch", false, "patch version bump")
@@ -191,7 +233,7 @@ func config() {
 	flag.BoolVar(&writeInput, "write", envIs(envAlwaysWrite), "writeInput version file")
 	flag.BoolVar(&checkFile, "check", false, "check version file")
 	flag.BoolVar(&shouldFix, "fix", false, "fix version file")
-	flag.BoolVar(&gomod, "gomod", false, "handle input as a go.mod file")
+	flag.BoolVar(&gomod, "gomod", false, "handle input as a go.fixGoMod file")
 	flag.Parse()
 	neverFix = envIs(envNeverFix)
 	if neverFix {
@@ -207,7 +249,7 @@ func config() {
 		os.Exit(0)
 	}
 	if showEnv {
-		fmt.Println(env(""))
+		fmt.Println(appEnv(""))
 		os.Exit(0)
 	}
 	if showAbout {
@@ -320,7 +362,7 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 	}
 }
 
-func handleGoMod() {
+func fixGoMod() {
 	bumpFlags, _ := validate()
 	isBumpAttempted := bumpFlags > 0 || alpha || beta || rc || preview
 	if isBumpAttempted {
@@ -364,11 +406,11 @@ func handleGoMod() {
 	}
 
 	if !shouldFix {
-		_, _ = fmt.Fprintln(os.Stderr, "error: go.mod version is in short format (e.g., 1.24), run with -fix to correct")
+		_, _ = fmt.Fprintln(os.Stderr, "error: go.fixGoMod version is in short format (e.g., 1.24), run with -fix to correctContents")
 		os.Exit(1)
 	}
 
-	// --- Fix logic for go.mod ---
+	// --- Fix logic for go.fixGoMod ---
 	fixedVersion := ""
 	goVersionPath := filepath.Join(os.Getenv("HOME"), "go", "version")
 	if _, err := os.Stat(goVersionPath); err == nil {
@@ -400,7 +442,7 @@ func handleGoMod() {
 	}
 }
 
-func correct(in []byte) ([]byte, error) {
+func correctContents(in []byte) ([]byte, error) {
 	content := strings.TrimSpace(string(in))
 
 	if len(content) == 0 {
@@ -430,43 +472,6 @@ func correct(in []byte) ([]byte, error) {
 	return nil, fmt.Errorf("file contents cannot be fixed: %q", content)
 }
 
-func env(indent string) string {
-	var out strings.Builder
-	for e, v := range map[string]string{
-		envAlwaysWrite:  strconv.FormatBool(envIs(envAlwaysWrite)),
-		envDefaultInput: envVal(envDefaultInput, defaultInput),
-		envNeverFix:     strconv.FormatBool(envIs(envNeverFix)),
-		envNoAlpha:      strconv.FormatBool(envIs(envNoAlpha)),
-		envNoBeta:       strconv.FormatBool(envIs(envNoBeta)),
-		envNoAlphaBeta:  strconv.FormatBool(envIs(envNoAlphaBeta)),
-		envNoRC:         strconv.FormatBool(envIs(envNoRC)),
-		envNoPreview:    strconv.FormatBool(envIs(envNoPreview)),
-	} {
-		out.WriteString(fmt.Sprintf("%s%s=%s\n", indent, e, envVal(e, v)))
-	}
-	return out.String()
-}
-
-func envVal(name, fallback string) string {
-	v, ok := os.LookupEnv(name)
-	if !ok {
-		return fallback
-	}
-	return v
-}
-
-func envIs(name string) bool {
-	v, ok := os.LookupEnv(name)
-	if !ok {
-		return false
-	}
-	vb, err := strconv.ParseBool(v)
-	if err != nil {
-		return false
-	}
-	return vb
-}
-
 var check = func(what interface{}) {
 	switch q := what.(type) {
 	case error:
@@ -478,8 +483,4 @@ var check = func(what interface{}) {
 			log.Printf("%v\n", q)
 		}
 	}
-}
-
-type result struct {
-	Version string `json:"version"`
 }

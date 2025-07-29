@@ -80,13 +80,16 @@ linux-amd64: $(BIN_DIR) summary
 windows-amd64: $(BIN_DIR) summary
 	@GOOS=windows GOARCH=amd64 $(MAKE) app-binary
 
-.PHONY: test test-unit test-fuzz test-fuzz-long test-bench
+.PHONY: test test-cli test-unit test-fuzz test-fuzz-long test-bench
 
 UNIT_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.unit.md"
 FUZZ_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.fuzz.md"
 BENCH_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.benchmark.md"
 
-test: test-unit test-bench test-fuzz
+test: test-cli test-unit test-bench test-fuzz
+
+test-cli:
+	@sh ./test.sh
 
 test-unit: $(TEST_DIR)
 	@printf "%s" "Testing Unit... "

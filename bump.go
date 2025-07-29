@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	BinaryVersion = "v1.0.3"
+	BinaryVersion = "v1.0.4"
 
 	envAlwaysWrite  = "BUMP_ALWAYS_WRITE"
 	envDefaultInput = "BUMP_DEFAULT_INPUT"
@@ -23,9 +24,15 @@ const (
 	envNoBeta       = "BUMP_NO_BETA"
 	envNoRC         = "BUMP_NO_RC"
 	envNoPreview    = "BUMP_NO_PREVIEW"
+	envNeverFix     = "BUMP_NEVER_FIX"
 )
 
 var (
+	reTwoPartPre = regexp.MustCompile(`^(\d+)\.(\d+)(-[a-zA-Z0-9-.]+)$`)
+	reThreePart  = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)$`)
+	reTwoPart    = regexp.MustCompile(`^(\d+)\.(\d+)$`)
+	reFuzzy      = regexp.MustCompile(`^(\d+)\.(\d+).*`)
+
 	initialInputFile = filepath.Join(".", "VERSION")
 
 	showAbout    bool
@@ -43,8 +50,10 @@ var (
 	writeInput   bool
 	checkFile    bool
 	inputFile    string
-	alwaysWrite  bool
 	defaultInput string
+	shouldFix    bool
+	gomod        bool
+	neverFix     bool
 	noAlphaBeta  bool
 	noAlpha      bool
 	noBeta       bool
@@ -56,6 +65,8 @@ func about() {
 	var out strings.Builder
 	out.WriteString("Bump Version: " + BinaryVersion + "\n")
 	out.WriteString("Usage:\n")
+	out.WriteString("  bump -fix [-write] [-in=FILE]\n")
+	out.WriteString("  bump -fix -gomod [-write] [-in=go.mod]\n")
 	out.WriteString("  bump -check\n")
 	out.WriteString("  bump -[major|minor|patch|alpha|beta|rc|preview]\n")
 	out.WriteString("  bump -[major|minor|patch|alpha|beta|rc|preview] -write\n")
@@ -82,9 +93,47 @@ func main() {
 	// config sets up the initial flags for the binary
 	config()
 
+	if gomod {
+		handleGoMod()
+		return
+	}
+
 	version := bump.Version{}
 	// version.ParseFile() opens the inputFile and loads the contents using fmt.Sscanf on the []byte from the contents
-	check(version.ParseFile(inputFile))
+	err := version.ParseFile(inputFile)
+	if err != nil {
+		if !shouldFix || neverFix {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		// --- FIX LOGIC ---
+		var originalContent []byte
+		isNotExist := os.IsNotExist(err)
+
+		if isNotExist {
+			originalContent = []byte{}
+		} else {
+			originalContent = []byte(version.Raw())
+		}
+
+		fixedContent, fixErr := correct(originalContent)
+		if fixErr != nil {
+			_, _ = fmt.Fprintln(os.Stderr, fixErr.Error())
+			os.Exit(1)
+		}
+
+		fmt.Println(string(fixedContent))
+
+		if writeInput {
+			writeErr := os.WriteFile(inputFile, fixedContent, 0644)
+			if writeErr != nil {
+				_, _ = fmt.Fprintln(os.Stderr, "Error writing file:", writeErr)
+				os.Exit(1)
+			}
+		}
+		os.Exit(0) // Fix is a terminal operation.
+	}
 
 	// version.Raw() provides the string value of the []byte from the os.ReadFile(inputFile)
 	originalVersion := version.Raw()
@@ -139,10 +188,15 @@ func config() {
 	flag.BoolVar(&preview, "preview", false, "preview version bump")
 	flag.BoolVar(&useJson, "json", false, "use json version bump")
 	flag.BoolVar(&showVersion, "v", false, "show version")
-	flag.BoolVar(&writeInput, "write", false, "writeInput version file")
+	flag.BoolVar(&writeInput, "write", envIs(envAlwaysWrite), "writeInput version file")
 	flag.BoolVar(&checkFile, "check", false, "check version file")
+	flag.BoolVar(&shouldFix, "fix", false, "fix version file")
+	flag.BoolVar(&gomod, "gomod", false, "handle input as a go.mod file")
 	flag.Parse()
-	alwaysWrite = envIs(envAlwaysWrite)
+	neverFix = envIs(envNeverFix)
+	if neverFix {
+		shouldFix = false
+	}
 	noAlphaBeta = envIs(envNoAlphaBeta)
 	noAlpha = envIs(envNoAlpha)
 	noBeta = envIs(envNoBeta)
@@ -227,7 +281,7 @@ func run(version *bump.Version) {
 // finish renders the final output to the user respecting their choice of -json and -write
 func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersion, newVersion string) {
 	if wasBumped {
-		if writeInput || alwaysWrite {
+		if writeInput {
 			check(version.Save(inputFile))
 			if useJson {
 				output, err := json.MarshalIndent(version, "", "  ")
@@ -245,7 +299,7 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 				fmt.Printf("Bumped %s → %s\n", originalVersion, newVersion)
 			}
 		}
-	} else if writeInput || alwaysWrite {
+	} else if writeInput {
 		check(version.Save(inputFile))
 		if useJson {
 			output, err := json.MarshalIndent(version, "", "  ")
@@ -264,19 +318,129 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 			fmt.Printf("Current version is: %s\n", originalVersion)
 		}
 	}
+}
 
+func handleGoMod() {
+	bumpFlags, _ := validate()
+	isBumpAttempted := bumpFlags > 0 || alpha || beta || rc || preview
+	if isBumpAttempted {
+		_, _ = fmt.Fprintln(os.Stderr, "error: bump commands (-major, -minor, etc.) are ineligible with the -gomod flag")
+		os.Exit(1)
+	}
+
+	content, err := os.ReadFile(inputFile)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "error reading file:", err)
+		os.Exit(1)
+	}
+
+	lines := strings.Split(string(content), "\n")
+	lineIndex, goVersion := -1, ""
+
+	for i, line := range lines {
+		if strings.HasPrefix(line, "go ") {
+			if parts := strings.Fields(line); len(parts) == 2 {
+				lineIndex, goVersion = i, parts[1]
+				break
+			}
+		}
+	}
+
+	if lineIndex == -1 {
+		_, _ = fmt.Fprintln(os.Stderr, "error: could not find 'go' directive in", inputFile)
+		os.Exit(1)
+	}
+
+	if len(strings.Split(goVersion, ".")) != 2 {
+		if !checkFile {
+			fmt.Println(goVersion)
+		}
+		os.Exit(0) // Format is valid (e.g., 1.24.5), so exit 0.
+	}
+
+	// Format is `x.y`, which is considered invalid for check or requires a fix.
+	if checkFile {
+		os.Exit(1)
+	}
+
+	if !shouldFix {
+		_, _ = fmt.Fprintln(os.Stderr, "error: go.mod version is in short format (e.g., 1.24), run with -fix to correct")
+		os.Exit(1)
+	}
+
+	// --- Fix logic for go.mod ---
+	fixedVersion := ""
+	goVersionPath := filepath.Join(os.Getenv("HOME"), "go", "version")
+	if _, err := os.Stat(goVersionPath); err == nil {
+		if b, err := os.ReadFile(goVersionPath); err == nil {
+			versionFromFile := strings.TrimSpace(string(b))
+			if strings.HasPrefix(versionFromFile, goVersion+".") {
+				fixedVersion = versionFromFile
+			}
+		}
+	}
+
+	if fixedVersion == "" { // Fallback if file doesn't provide a fix
+		if goVersion == "1.24" {
+			fixedVersion = "1.24.5"
+		} else {
+			_, _ = fmt.Fprintln(os.Stderr, "error: no fix available for go version", goVersion)
+			os.Exit(1)
+		}
+	}
+
+	fmt.Println(fixedVersion)
+	if writeInput {
+		lines[lineIndex] = "go " + fixedVersion
+		newContent := strings.Join(lines, "\n")
+		if err := os.WriteFile(inputFile, []byte(newContent), 0644); err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "error writing to file:", err)
+			os.Exit(1)
+		}
+	}
+}
+
+func correct(in []byte) ([]byte, error) {
+	content := strings.TrimSpace(string(in))
+
+	if len(content) == 0 {
+		return []byte("v0.0.1-beta.1"), nil
+	}
+
+	// Pattern: 1.24-beta.1 -> v1.24.0-beta.1
+	if matches := reTwoPartPre.FindStringSubmatch(content); len(matches) > 0 {
+		return []byte(fmt.Sprintf("v%s.%s.0%s", matches[1], matches[2], matches[3])), nil
+	}
+
+	// Pattern: 1.24.5 -> v1.24.5
+	if reThreePart.MatchString(content) {
+		return []byte("v" + content), nil
+	}
+
+	// Pattern: 1.24 -> v1.24.0
+	if reTwoPart.MatchString(content) {
+		return []byte("v" + content + ".0"), nil
+	}
+
+	// Pattern for "1.24.x-beta-q" -> "v1.24.0-beta.1"
+	if matches := reFuzzy.FindStringSubmatch(content); len(matches) > 0 {
+		return []byte(fmt.Sprintf("v%s.%s.0-beta.1", matches[1], matches[2])), nil
+	}
+
+	return nil, fmt.Errorf("file contents cannot be fixed: %q", content)
 }
 
 func env(indent string) string {
 	var out strings.Builder
 	for e, v := range map[string]string{
-		envAlwaysWrite:  strconv.FormatBool(alwaysWrite),
-		envDefaultInput: defaultInput,
-		envNoAlpha:      strconv.FormatBool(noAlpha),
-		envNoBeta:       strconv.FormatBool(noBeta),
-		envNoAlphaBeta:  strconv.FormatBool(noAlphaBeta),
-		envNoRC:         strconv.FormatBool(noRC),
-		envNoPreview:    strconv.FormatBool(noPreview),
+		envAlwaysWrite:  strconv.FormatBool(envIs(envAlwaysWrite)),
+		envDefaultInput: envVal(envDefaultInput, defaultInput),
+		envNeverFix:     strconv.FormatBool(envIs(envNeverFix)),
+		envNoAlpha:      strconv.FormatBool(envIs(envNoAlpha)),
+		envNoBeta:       strconv.FormatBool(envIs(envNoBeta)),
+		envNoAlphaBeta:  strconv.FormatBool(envIs(envNoAlphaBeta)),
+		envNoRC:         strconv.FormatBool(envIs(envNoRC)),
+		envNoPreview:    strconv.FormatBool(envIs(envNoPreview)),
 	} {
 		out.WriteString(fmt.Sprintf("%s%s=%s\n", indent, e, envVal(e, v)))
 	}

@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -19,7 +18,7 @@ type result struct {
 }
 
 const (
-	BinaryVersion = "v1.0.4"
+	BinaryVersion = "v1.0.5-beta.1"
 
 	envAlwaysWrite  = "BUMP_ALWAYS_WRITE"
 	envDefaultInput = "BUMP_DEFAULT_INPUT"
@@ -32,11 +31,6 @@ const (
 )
 
 var (
-	reTwoPartPre = regexp.MustCompile(`^(\d+)\.(\d+)(-[a-zA-Z0-9-.]+)$`)
-	reThreePart  = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)$`)
-	reTwoPart    = regexp.MustCompile(`^(\d+)\.(\d+)$`)
-	reFuzzy      = regexp.MustCompile(`^(\d+)\.(\d+).*`)
-
 	initialInputFile = filepath.Join(".", "VERSION")
 
 	setEnvVal    string
@@ -114,6 +108,10 @@ func about() {
 	out.WriteString("  bump -[major|minor|patch|alpha|beta|rc|preview] -write\n")
 	out.WriteString("  bump -json -[major|minor|patch|alpha|beta|rc|preview]\n")
 	out.WriteString("  bump -json -[major|minor|patch|alpha|beta|rc|preview] -write\n")
+	out.WriteString("Supported File Types:\n")
+	for _, t := range bump.SupportedFiles {
+		out.WriteString(fmt.Sprintf("  %s\n", t))
+	}
 	out.WriteString("Defaults: \n")
 	out.WriteString(fmt.Sprintf("  -in=%s [default: %s]\n", inputFile, defaultInput))
 	out.WriteString("Environment Variables:\n")
@@ -140,7 +138,7 @@ func main() {
 		return
 	}
 
-	version := bump.Version{}
+	version := bump.NewVersion()
 	// version.ParseFile() opens the inputFile and loads the contents using fmt.Sscanf on the []byte from the contents
 	err := version.ParseFile(inputFile)
 	if err != nil {
@@ -149,26 +147,16 @@ func main() {
 			os.Exit(1)
 		}
 
-		// --- FIX LOGIC ---
-		var originalContent []byte
-		isNotExist := os.IsNotExist(err)
-
-		if isNotExist {
-			originalContent = []byte{}
-		} else {
-			originalContent = []byte(version.Raw())
-		}
-
-		fixedContent, fixErr := correctContents(originalContent)
+		fixErr := version.Fix()
 		if fixErr != nil {
 			_, _ = fmt.Fprintln(os.Stderr, fixErr.Error())
 			os.Exit(1)
 		}
 
-		fmt.Println(string(fixedContent))
+		fmt.Println(version.String())
 
 		if writeInput {
-			writeErr := os.WriteFile(inputFile, fixedContent, 0644)
+			writeErr := version.Save(inputFile)
 			if writeErr != nil {
 				_, _ = fmt.Fprintln(os.Stderr, "Error writing file:", writeErr)
 				os.Exit(1)
@@ -200,7 +188,7 @@ func main() {
 	check(err)
 
 	// run() performs the ++ on the int values within the bump.Version struct itself
-	run(&version)
+	run(version)
 
 	// this renders a new output value using the pattern based on the type of the release based on its int values
 	newVersion := version.String()
@@ -212,7 +200,7 @@ func main() {
 	wasBumped := !strings.EqualFold(originalVersion, newVersion)
 
 	// finish() renders the final output to the user
-	finish(&version, wasBumped, bumpFlags, originalVersion, newVersion)
+	finish(version, wasBumped, bumpFlags, originalVersion, newVersion)
 }
 
 func config() {
@@ -362,6 +350,24 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 	}
 }
 
+func fixPackageJSON(path string) error {
+	bumpFlags, _ := validate()
+	isBumpAttempted := bumpFlags > 0 || alpha || beta || rc || preview
+	if isBumpAttempted {
+		_, _ = fmt.Fprintln(os.Stderr, "error: bump commands (-major, -minor, etc.) are ineligible with the -gomod flag")
+		os.Exit(1)
+	}
+
+	ver := bump.NewVersion()
+	err := ver.ParseFile(path)
+	if err != nil {
+		return fmt.Errorf("bump.Version.ParseFile(%s) threw err: %w", path, err)
+	}
+
+	return nil
+
+}
+
 func fixGoMod() {
 	bumpFlags, _ := validate()
 	isBumpAttempted := bumpFlags > 0 || alpha || beta || rc || preview
@@ -440,36 +446,6 @@ func fixGoMod() {
 			os.Exit(1)
 		}
 	}
-}
-
-func correctContents(in []byte) ([]byte, error) {
-	content := strings.TrimSpace(string(in))
-
-	if len(content) == 0 {
-		return []byte("v0.0.1-beta.1"), nil
-	}
-
-	// Pattern: 1.24-beta.1 -> v1.24.0-beta.1
-	if matches := reTwoPartPre.FindStringSubmatch(content); len(matches) > 0 {
-		return []byte(fmt.Sprintf("v%s.%s.0%s", matches[1], matches[2], matches[3])), nil
-	}
-
-	// Pattern: 1.24.5 -> v1.24.5
-	if reThreePart.MatchString(content) {
-		return []byte("v" + content), nil
-	}
-
-	// Pattern: 1.24 -> v1.24.0
-	if reTwoPart.MatchString(content) {
-		return []byte("v" + content + ".0"), nil
-	}
-
-	// Pattern for "1.24.x-beta-q" -> "v1.24.0-beta.1"
-	if matches := reFuzzy.FindStringSubmatch(content); len(matches) > 0 {
-		return []byte(fmt.Sprintf("v%s.%s.0-beta.1", matches[1], matches[2])), nil
-	}
-
-	return nil, fmt.Errorf("file contents cannot be fixed: %q", content)
 }
 
 var check = func(what interface{}) {

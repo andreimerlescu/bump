@@ -10,21 +10,20 @@ go install github.com/andreimerlescu/counter@latest || safe_exit "failed to inst
 
 [ ! -d .counters ] && { mkdir -p .counters || safe_exit "failed to mkdir .counters"; }
 
-export COUNTER_USE_FORCE=1
-declare COUNTER_DIR
 COUNTER_DIR=$(realpath .counters)
-export COUNTER_DIR
 
+export COUNTER_USE_FORCE=1
 export COUNTER_ALWAYS_YES=1
+
+declare COUNTER_DIR
+export COUNTER_DIR
 
 declare counterName
 counterName="bump-test-passes"
-
 counter -name $counterName -reset -yes 1> /dev/null || safe_exit "failed to reset counter"
 
 echo "Preparing test env..."
 mkdir -p test-data || safe_exit "failed to mkdir test-data"
-pwd
 go build -o ./test-data/bump . || safe_exit "failed to build bump"
 cd test-data || safe_exit "failed to cd test-data"
 chmod +x bump || safe_exit "failed to chmod bump"

@@ -322,7 +322,7 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 	} else if wasBumped {
 		if writeInput {
 			check(version.Save(inputFile))
-			if strings.EqualFold(originalVersion, newVersion) {
+			if strings.EqualFold(originalVersion, newVersion) && len(shouldParse) > 0 {
 				fmt.Printf("Parsed %s (saved to %s)\n", newVersion, inputFile)
 			} else {
 				fmt.Printf("Bumped %s → %s (saved to %s)\n", originalVersion, newVersion, inputFile)

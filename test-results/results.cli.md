@@ -1,6 +1,6 @@
 ### `/Users/andrei/work/bump/test-results/results.cli.md` 
 
- Test results captured at 2025-08-01 21:53:09. 
+ Test results captured at 2025-08-01 21:59:55. 
 
 ```log
 Preparing test env...
@@ -207,16 +207,16 @@ andrei@bump:test.sh ⚡ Test #96 ⇒  echo "--- SCENARIO TWELVE: Environment Var
 --- SCENARIO TWELVE: Environment Variables ---
 andrei@bump:test.sh ⚡ Test #97 ⇒  echo "v5.5.5" > VERSION
 andrei@bump:test.sh ⚡ Test #98 ⇒  BUMP_ALWAYS_WRITE=true bump -env
+BUMP_NEVER_FIX=false
+BUMP_NO_ALPHA=false
 BUMP_NO_BETA=false
 BUMP_NO_ALPHA_BETA=false
 BUMP_ALWAYS_FIX=false
 BUMP_ALWAYS_WRITE=true
 BUMP_DEFAULT_INPUT=VERSION
-BUMP_NO_ALPHA=false
 BUMP_NO_RC=false
 BUMP_NO_PREVIEW=false
 BUMP_INIT_ON_NOT_FOUND=false
-BUMP_NEVER_FIX=false
 andrei@bump:test.sh ⚡ Test #99 ⇒  BUMP_ALWAYS_WRITE=true bump -patch
 Bumped v5.5.5 → v5.5.6 (saved to VERSION)
 andrei@bump:test.sh ⚡ Test #100 ⇒  grep 'v5.5.6' VERSION

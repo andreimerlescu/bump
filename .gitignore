@@ -5,7 +5,6 @@ bin/
 *.log
 backups/
 .DS_Store
-test-results/
 test-data/
 .counters/
 analysis/

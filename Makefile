@@ -29,9 +29,11 @@ $(BIN_DIR):
 		mkdir -p $(BIN_DIR); \
 	fi
 
-.PHONY: all clean summary install app-binary
+.PHONY: all all-no-test clean summary install app-binary
 
 all: test summary darwin-amd64 darwin-arm64 linux-amd64 linux-arm64 windows-amd64 install
+
+all-no-test: summary darwin-amd64 darwin-arm64 linux-amd64 linux-arm64 windows-amd64 install
 
 clean:
 	@rm -rf $(BIN_DIR)
@@ -82,6 +84,7 @@ windows-amd64: $(BIN_DIR) summary
 
 .PHONY: test test-cli test-unit test-fuzz test-fuzz-long test-bench
 
+CLI_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.cli.md"
 UNIT_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.unit.md"
 FUZZ_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.fuzz.md"
 BENCH_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.benchmark.md"
@@ -89,7 +92,21 @@ BENCH_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.benchmark.md"
 test: test-cli test-unit test-bench test-fuzz
 
 test-cli:
-	@sh ./test.sh
+	@printf "%s" "Testing CLI... "
+	@touch $(CLI_LOG)
+	@echo "### \`$(CLI_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(CLI_LOG)
+	@start_time=$$(date +%s); \
+	NO_COLOR=true sh ./test.sh >> $(CLI_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
+		echo "FAILED!"; \
+		exit 1; \
+	fi; \
+	echo "\`\`\`" >> $(CLI_LOG); \
+	echo "" >> $(CLI_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(CLI_LOG)") ( size: $(shell du -h "$(CLI_LOG)" | awk '{print $$1}') )"
 
 test-unit: $(TEST_DIR)
 	@printf "%s" "Testing Unit... "

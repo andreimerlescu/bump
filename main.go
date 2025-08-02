@@ -18,7 +18,7 @@ type result struct {
 }
 
 const (
-	BinaryVersion = "v1.0.5"
+	BinaryVersion = "v1.0.6"
 
 	envAlwaysWrite    = "BUMP_ALWAYS_WRITE"
 	envDefaultInput   = "BUMP_DEFAULT_INPUT"

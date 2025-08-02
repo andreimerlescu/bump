@@ -1,6 +1,6 @@
 ### `/Users/andrei/work/bump/test-results/results.cli.md` 
 
- Test results captured at 2025-08-02 11:40:05. 
+ Test results captured at 2025-08-02 11:41:40. 
 
 ```log
 Preparing test env...
@@ -191,16 +191,16 @@ andrei@bump:test.sh ⚡ Test #87 ⇒  grep '<version>2.2.3</version>' pom.xml
 andrei@bump:test.sh ⚡ Test #88 ⇒  rm pom.xml
 andrei@bump:test.sh ⚡ Test #89 ⇒  echo "v5.5.5" > VERSION
 andrei@bump:test.sh ⚡ Test #90 ⇒  BUMP_ALWAYS_WRITE=true bump -env
-BUMP_NO_PREVIEW=false
-BUMP_INIT_ON_NOT_FOUND=false
-BUMP_ALWAYS_FIX=false
+BUMP_ALWAYS_WRITE=true
 BUMP_DEFAULT_INPUT=VERSION
 BUMP_NEVER_FIX=false
-BUMP_NO_BETA=false
-BUMP_ALWAYS_WRITE=true
-BUMP_NO_ALPHA=false
-BUMP_NO_ALPHA_BETA=false
 BUMP_NO_RC=false
+BUMP_ALWAYS_FIX=false
+BUMP_NO_ALPHA=false
+BUMP_NO_BETA=false
+BUMP_NO_ALPHA_BETA=false
+BUMP_NO_PREVIEW=false
+BUMP_INIT_ON_NOT_FOUND=false
 andrei@bump:test.sh ⚡ Test #91 ⇒  BUMP_ALWAYS_WRITE=true bump -patch
 Bumped v5.5.5 → v5.5.6 (saved to VERSION)
 andrei@bump:test.sh ⚡ Test #92 ⇒  grep 'v5.5.6' VERSION

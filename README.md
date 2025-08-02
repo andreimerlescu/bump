@@ -109,7 +109,7 @@ bump -about
 ```
 
 ```log
-Bump Version: v1.0.5
+Bump Version: v1.0.6
 Usage:
   bump -check [-in=FILE]
   bump -fix [-write] [-in=FILE]
@@ -248,7 +248,7 @@ make test-fuzz-long # 30s run
 ```
 
 ```log
-Testing CLI... SUCCESS! Took 2 (s)! Wrote results.cli.md (size: 12K )
+Testing CLI... SUCCESS! Took 3 (s)! Wrote results.cli.md (size: 12K )
 Testing Unit... SUCCESS! Took 1 (s)! Wrote results.unit.md ( size: 4.0K )
 Testing Benchmark... SUCCESS! Took 2 (s)! Wrote results.benchmark.md ( size: 4.0K )
 Testing Fuzz... SUCCESS! Took 33 (s)! Wrote results.fuzz.md ( size: 4.0K )
@@ -258,107 +258,93 @@ Testing Fuzz... SUCCESS! Took 33 (s)! Wrote results.fuzz.md ( size: 4.0K )
 
 ### `/Users/andrei/work/bump/test-results/results.cli.md`
 
-Test results captured at 2025-08-01 12:30:40.
+Test results captured at 2025-08-02 11:41:40.
 
 ```log
 Preparing test env...
-run.01(echo "--- SCENARIO ONE ---") - SUCCESS
-    output: --- SCENARIO ONE ---
-run.02(echo "v1.0.0" > VERSION) - SUCCESS
-run.03(bump -check) - SUCCESS
-    output: v1.0.0
-run.04(cat VERSION) - SUCCESS
-    output: v1.0.0
-run.05(bump -alpha) - SUCCESS
-    output: Bumped v1.0.0 → v1.0.0-alpha.1
-run.06(cat VERSION) - SUCCESS
-    output: v1.0.0
-run.07(bump -alpha -write) - SUCCESS
-    output: Bumped v1.0.0 → v1.0.0-alpha.1 (saved to VERSION)
-run.08(cat VERSION) - SUCCESS
-    output: v1.0.0-alpha.1
-run.09(rm VERSION) - SUCCESS
-run.10(echo "--- SCENARIO TWO ---") - SUCCESS
-    output: --- SCENARIO TWO ---
-run.11(echo "v1.0.0-alpha.0" > VERSION) - SUCCESS
-run.12(bump -check) - SUCCESS
-    output: v1.0.0
-run.13(cat VERSION) - SUCCESS
-    output: v1.0.0-alpha.0
-run.14(bump -alpha) - SUCCESS
-    output: Bumped v1.0.0 → v1.0.0-alpha.1
-run.15(cat VERSION) - SUCCESS
-    output: v1.0.0-alpha.0
-run.16(bump -alpha -write) - SUCCESS
-    output: Bumped v1.0.0 → v1.0.0-alpha.1 (saved to VERSION)
-run.17(cat VERSION) - SUCCESS
-    output: v1.0.0-alpha.1
-run.18(bump -patch) - SUCCESS
-    output: Bumped v1.0.0-alpha.1 → v1.0.1
-run.19(cat VERSION) - SUCCESS
-    output: v1.0.0-alpha.1
-run.20(bump -patch -write) - SUCCESS
-    output: Bumped v1.0.0-alpha.1 → v1.0.1 (saved to VERSION)
-run.21(cat VERSION) - SUCCESS
-    output: v1.0.1
-run.22(bump -major -write) - SUCCESS
-    output: Bumped v1.0.1 → v2.0.0 (saved to VERSION)
-run.23(cat VERSION) - SUCCESS
-    output: v2.0.0
-run.24(bump -preview -write) - SUCCESS
-    output: Bumped v2.0.0 → v2.0.0-preview.1 (saved to VERSION)
-run.25(rm VERSION) - SUCCESS
-run.26(echo "--- SCENARIO THREE ---") - SUCCESS
-    output: --- SCENARIO THREE ---
-run.27(echo "1.25" > VERSION) - SUCCESS
-run.28(bump -fix) - SUCCESS
-    output: No bump operation specified. Use -major, -minor, -patch, etc., to bump the version.
-Current version is: v1.25.0
-run.29(bump -fix -write) - SUCCESS
-    output: Fixed and saved version v1.25.0 to VERSION
-run.30(rm VERSION) - SUCCESS
-run.31(echo "--- SCENARIO FOUR ---") - SUCCESS
-    output: --- SCENARIO FOUR ---
-run.32(echo "v1.17.7-beta.6" > VERSION) - SUCCESS
-run.33(bump -check -fix) - SUCCESS
-    output: v1.17.7-beta.6
-run.34(cat VERSION) - SUCCESS
-    output: v1.17.7-beta.6
-run.35(bump -check -fix -write) - SUCCESS
-    output: v1.17.7-beta.6
-run.36(cat VERSION) - SUCCESS
-    output: v1.17.7-beta.6
-run.37(rm VERSION) - SUCCESS
-run.38(echo "--- SCENARIO FIVE ---") - SUCCESS
-    output: --- SCENARIO FIVE ---
-run.39(echo "module testApp-bump-test-passes" > go.mod) - SUCCESS
-run.40(echo "" >> go.mod) - SUCCESS
-run.41(echo "go 1.24" >> go.mod) - SUCCESS
-run.42(cat go.mod) - SUCCESS
-    output: module testApp-bump-test-passes
+andrei@bump:test.sh ⚡ Test #1 ⇒  echo "v1.0.0" > VERSION
+andrei@bump:test.sh ⚡ Test #2 ⇒  bump -check
+v1.0.0
+andrei@bump:test.sh ⚡ Test #3 ⇒  cat VERSION
+v1.0.0
+andrei@bump:test.sh ⚡ Test #4 ⇒  bump -alpha
+Bumped v1.0.0 → v1.0.0-alpha.1
+andrei@bump:test.sh ⚡ Test #5 ⇒  cat VERSION
+v1.0.0
+andrei@bump:test.sh ⚡ Test #6 ⇒  bump -alpha -write
+Bumped v1.0.0 → v1.0.0-alpha.1 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #7 ⇒  cat VERSION
+v1.0.0-alpha.1
+andrei@bump:test.sh ⚡ Test #8 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #9 ⇒  echo "v1.0.0-alpha.0" > VERSION
+andrei@bump:test.sh ⚡ Test #10 ⇒  bump -check
+v1.0.0-alpha.0
+andrei@bump:test.sh ⚡ Test #11 ⇒  cat VERSION
+v1.0.0-alpha.0
+andrei@bump:test.sh ⚡ Test #12 ⇒  bump -alpha
+Bumped v1.0.0-alpha.0 → v1.0.0-alpha.1
+andrei@bump:test.sh ⚡ Test #13 ⇒  cat VERSION
+v1.0.0-alpha.0
+andrei@bump:test.sh ⚡ Test #14 ⇒  bump -alpha -write
+Bumped v1.0.0-alpha.0 → v1.0.0-alpha.1 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #15 ⇒  cat VERSION
+v1.0.0-alpha.1
+andrei@bump:test.sh ⚡ Test #16 ⇒  bump -patch
+Bumped v1.0.0-alpha.1 → v1.0.1
+andrei@bump:test.sh ⚡ Test #17 ⇒  cat VERSION
+v1.0.0-alpha.1
+andrei@bump:test.sh ⚡ Test #18 ⇒  bump -patch -write
+Bumped v1.0.0-alpha.1 → v1.0.1 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #19 ⇒  cat VERSION
+v1.0.1
+andrei@bump:test.sh ⚡ Test #20 ⇒  bump -major -write
+Bumped v1.0.1 → v2.0.0 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #21 ⇒  cat VERSION
+v2.0.0
+andrei@bump:test.sh ⚡ Test #22 ⇒  bump -preview -write
+Bumped v2.0.0 → v2.0.0-preview.1 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #23 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #24 ⇒  echo "1.25" > VERSION
+andrei@bump:test.sh ⚡ Test #25 ⇒  bump -fix
+Bumped v1.25.0 → v1.25.0
+andrei@bump:test.sh ⚡ Test #26 ⇒  bump -fix -write
+Bumped v1.25.0 → v1.25.0 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #27 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #28 ⇒  echo "v1.17.7-beta.6" > VERSION
+andrei@bump:test.sh ⚡ Test #29 ⇒  bump -check -fix
+v1.17.7-beta.6
+andrei@bump:test.sh ⚡ Test #30 ⇒  cat VERSION
+v1.17.7-beta.6
+andrei@bump:test.sh ⚡ Test #31 ⇒  bump -check -fix -write
+v1.17.7-beta.6
+andrei@bump:test.sh ⚡ Test #32 ⇒  cat VERSION
+v1.17.7-beta.6
+andrei@bump:test.sh ⚡ Test #33 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #34 ⇒  echo "module testApp-" > go.mod
+andrei@bump:test.sh ⚡ Test #35 ⇒  echo "" >> go.mod
+andrei@bump:test.sh ⚡ Test #36 ⇒  echo "go 1.24" >> go.mod
+andrei@bump:test.sh ⚡ Test #37 ⇒  cat go.mod
+module testApp-
 
 go 1.24
-run.43(bump -in go.mod -fix) - SUCCESS
-    output: No bump operation specified. Use -major, -minor, -patch, etc., to bump the version.
-Current version is: 1.24
-run.44(bump -in go.mod -fix -write) - SUCCESS
-    output: Fixed and saved version 1.24 to go.mod
-run.45(cat go.mod) - SUCCESS
-    output: module testApp-bump-test-passes
+andrei@bump:test.sh ⚡ Test #38 ⇒  bump -in go.mod -fix
+Bumped 1.24 → 1.24
+andrei@bump:test.sh ⚡ Test #39 ⇒  bump -in go.mod -fix -write
+Bumped 1.24 → 1.24 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #40 ⇒  cat go.mod
+module testApp-
 
-go 1.24
-run.46(rm go.mod) - SUCCESS
-run.47(echo "--- SCENARIO SIX ---") - SUCCESS
-    output: --- SCENARIO SIX ---
-run.48(echo v1.0.0 > VERSION) - SUCCESS
-run.49(bump -json -check) - SUCCESS
-    output: {
+go 1.24.0
+andrei@bump:test.sh ⚡ Test #41 ⇒  rm go.mod
+andrei@bump:test.sh ⚡ Test #42 ⇒  echo v1.0.0 > VERSION
+andrei@bump:test.sh ⚡ Test #43 ⇒  bump -json -check
+{
   "version": "v1.0.0"
 }
-run.50(cat VERSION) - SUCCESS
-    output: v1.0.0
-run.51(bump -json -beta) - SUCCESS
-    output: {
+andrei@bump:test.sh ⚡ Test #44 ⇒  cat VERSION
+v1.0.0
+andrei@bump:test.sh ⚡ Test #45 ⇒  bump -json -beta
+{
   "major": 1,
   "minor": 0,
   "patch": 0,
@@ -366,12 +352,12 @@ run.51(bump -json -beta) - SUCCESS
   "beta": 1,
   "rc": 0,
   "preview": 0,
-  "version": "v1.0.0-beta.1"
+  "version": "v1.0.0-alpha.0"
 }
-run.52(cat VERSION) - SUCCESS
-    output: v1.0.0
-run.53(bump -json -beta -write) - SUCCESS
-    output: {
+andrei@bump:test.sh ⚡ Test #46 ⇒  cat VERSION
+v1.0.0
+andrei@bump:test.sh ⚡ Test #47 ⇒  bump -json -beta -write
+{
   "major": 1,
   "minor": 0,
   "patch": 0,
@@ -379,35 +365,25 @@ run.53(bump -json -beta -write) - SUCCESS
   "beta": 1,
   "rc": 0,
   "preview": 0,
-  "version": "v1.0.0-beta.1"
+  "version": "v1.0.0-alpha.0"
 }
-run.54(cat VERSION) - SUCCESS
-    output: v1.0.0-beta.1
-run.55(rm VERSION) - SUCCESS
-run.56(echo "--- SCENARIO SEVEN: package.json ---") - SUCCESS
-    output: --- SCENARIO SEVEN: package.json ---
-run.57(echo eyJuYW1lIjoidGVzdCIsInZlcnNpb24iOiIxLjIuMyJ9 | base64 -d | tee package.json > /dev/null) - SUCCESS
-run.58(cat package.json) - SUCCESS
-    output: {"name":"test","version":"1.2.3"}
-run.59(bump -in package.json -fix) - SUCCESS
-    output: i can see this package.json
-i can see this package.json
-No bump operation specified. Use -major, -minor, -patch, etc., to bump the version.
-Current version is: 1.2.3
-run.60(bump -in package.json -fix -write) - SUCCESS
-    output: i can see this package.json
-i can see this package.json
-Fixed and saved version 1.2.3 to package.json
-run.61(bump -in package.json -patch) - SUCCESS
-    output: i can see this package.json
+andrei@bump:test.sh ⚡ Test #48 ⇒  cat VERSION
+v1.0.0-alpha.0
+andrei@bump:test.sh ⚡ Test #49 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #50 ⇒  echo 'eyJuYW1lIjoidGVzdCIsInZlcnNpb24iOiIxLjIuMyJ9' | base64 -d | tee package.json > /dev/null
+andrei@bump:test.sh ⚡ Test #51 ⇒  cat package.json
+{"name":"test","version":"1.2.3"}
+andrei@bump:test.sh ⚡ Test #52 ⇒  bump -in package.json -fix
+Bumped 1.2.3 → 1.2.3
+andrei@bump:test.sh ⚡ Test #53 ⇒  bump -in package.json -fix -write
+Bumped 1.2.3 → 1.2.3 (saved to package.json)
+andrei@bump:test.sh ⚡ Test #54 ⇒  bump -in package.json -patch
 Bumped 1.2.3 → 1.2.4
-run.62(bump -in package.json -patch -write) - SUCCESS
-    output: i can see this package.json
+andrei@bump:test.sh ⚡ Test #55 ⇒  bump -in package.json -patch -write
 Bumped 1.2.3 → 1.2.4 (saved to package.json)
-run.63(grep '"version": "1.2.4"' package.json) - SUCCESS
-    output:   "version": "1.2.4"
-run.64(bump -in package.json -json -minor) - SUCCESS
-    output: i can see this package.json
+andrei@bump:test.sh ⚡ Test #56 ⇒  grep '"version": "1.2.4"' package.json
+  "version": "1.2.4"
+andrei@bump:test.sh ⚡ Test #57 ⇒  bump -in package.json -json -minor
 {
   "major": 1,
   "minor": 3,
@@ -418,118 +394,200 @@ run.64(bump -in package.json -json -minor) - SUCCESS
   "preview": 0,
   "version": "1.3.0"
 }
-run.65(bump -in package.json -minor -write) - SUCCESS
-    output: i can see this package.json
+andrei@bump:test.sh ⚡ Test #58 ⇒  bump -in package.json -minor -write
 Bumped 1.2.4 → 1.3.0 (saved to package.json)
-run.66(grep '"version": "1.3.0"' package.json) - SUCCESS
-    output:   "version": "1.3.0"
-run.67(rm package.json) - SUCCESS
-run.68(echo "--- SCENARIO EIGHT: go.mod ---") - SUCCESS
-    output: --- SCENARIO EIGHT: go.mod ---
-run.69(echo 'module myapp' > go.mod && echo 'go 1.21' >> go.mod) - SUCCESS
-run.70(bump -in go.mod -check) - SUCCESS
-    output: 1.21
-run.71(bump -in go.mod -minor) - SUCCESS
-    output: Bumped 1.21 → 1.22
-run.72(bump -in go.mod -minor -write) - SUCCESS
-    output: Bumped 1.21 → 1.22 (saved to go.mod)
-run.73(grep 'go 1.22' go.mod) - SUCCESS
-    output: go 1.22
-run.74(rm go.mod) - SUCCESS
-run.75(echo "--- SCENARIO NINE: Dockerfile ---") - SUCCESS
-    output: --- SCENARIO NINE: Dockerfile ---
-run.76(echo 'LABEL version="v3.2.1"' > Dockerfile) - SUCCESS
-run.77(bump -in Dockerfile -check) - SUCCESS
-    output: v3.2.1
-run.78(bump -in Dockerfile -patch) - SUCCESS
-    output: Bumped v3.2.1 → v3.2.2
-run.79(bump -in Dockerfile -patch -write) - SUCCESS
-    output: Bumped v3.2.1 → v3.2.2 (saved to Dockerfile)
-run.80(grep 'LABEL version="v3.2.2"' Dockerfile) - SUCCESS
-    output: LABEL version="v3.2.2"
-run.81(rm Dockerfile) - SUCCESS
-run.82(echo "--- SCENARIO TEN: Chart.yaml (Helm) ---") - SUCCESS
-    output: --- SCENARIO TEN: Chart.yaml (Helm) ---
-run.83(echo 'YXBpVmVyc2lvbjogdjIKbmFtZTogbXljaGFydAp2ZXJzaW9uOiAwLjEuMAo=' | base64 -d | tee Chart.yaml > /dev/null) - SUCCESS
-run.84(bump -in Chart.yaml -check) - SUCCESS
-    output: 0.1.0
-run.85(bump -in Chart.yaml -patch) - SUCCESS
-    output: Bumped 0.1.0 → 0.1.1
-run.86(bump -in Chart.yaml -patch -write) - SUCCESS
-    output: Bumped 0.1.0 → 0.1.1 (saved to Chart.yaml)
-run.87(grep 'version: 0.1.1' Chart.yaml) - SUCCESS
-    output: version: 0.1.1
-run.88(rm Chart.yaml) - SUCCESS
-run.89(echo "--- SCENARIO ELEVEN: pom.xml (Maven) ---") - SUCCESS
-    output: --- SCENARIO ELEVEN: pom.xml (Maven) ---
-run.90(echo '<project><version>2.2.2</version></project>' > pom.xml) - SUCCESS
-run.91(bump -in pom.xml -check) - SUCCESS
-    output: 2.2.2
-run.92(bump -in pom.xml -patch) - SUCCESS
-    output: Bumped 2.2.2 → 2.2.3
-run.93(bump -in pom.xml -patch -write) - SUCCESS
-    output: Bumped 2.2.2 → 2.2.3 (saved to pom.xml)
-run.94(grep '<version>2.2.3</version>' pom.xml) - SUCCESS
-    output: <project><version>2.2.3</version></project>
-run.95(rm pom.xml) - SUCCESS
-run.96(echo "--- SCENARIO TWELVE: Environment Variables ---") - SUCCESS
-    output: --- SCENARIO TWELVE: Environment Variables ---
-run.97(echo "v5.5.5" > VERSION) - SUCCESS
-run.98(BUMP_ALWAYS_WRITE=true bump -env) - SUCCESS
-    output: BUMP_NO_BETA=false
-BUMP_NO_ALPHA_BETA=false
-BUMP_NO_RC=false
-BUMP_INIT_ON_NOT_FOUND=false
-BUMP_NO_PREVIEW=false
-BUMP_ALWAYS_FIX=false
+andrei@bump:test.sh ⚡ Test #59 ⇒  grep '"version": "1.3.0"' package.json
+  "version": "1.3.0"
+andrei@bump:test.sh ⚡ Test #60 ⇒  rm package.json
+andrei@bump:test.sh ⚡ Test #61 ⇒  echo 'module myapp' > go.mod && echo 'go 1.24' >> go.mod
+andrei@bump:test.sh ⚡ Test #62 ⇒  bump -in go.mod -check
+1.24
+andrei@bump:test.sh ⚡ Test #63 ⇒  bump -in go.mod -patch
+Bumped 1.24 → v1.24.1
+andrei@bump:test.sh ⚡ Test #64 ⇒  bump -in go.mod -patch -write
+Bumped 1.24 → v1.24.1 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #65 ⇒  bump -in go.mod -patch -write
+Bumped 1.24.1 → 1.24.2 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #66 ⇒  bump -in go.mod -patch -write
+Bumped 1.24.2 → 1.24.3 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #67 ⇒  bump -in go.mod -patch -write
+Bumped 1.24.3 → 1.24.4 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #68 ⇒  bump -in go.mod -patch -write
+Bumped 1.24.4 → 1.24.5 (saved to go.mod)
+andrei@bump:test.sh ⚡ Test #69 ⇒  grep 'go 1.24.5' go.mod
+go 1.24.5
+andrei@bump:test.sh ⚡ Test #70 ⇒  rm go.mod
+andrei@bump:test.sh ⚡ Test #71 ⇒  echo 'LABEL version="v3.2.1"' > Dockerfile
+andrei@bump:test.sh ⚡ Test #72 ⇒  bump -in Dockerfile -check
+v3.2.1
+andrei@bump:test.sh ⚡ Test #73 ⇒  bump -in Dockerfile -patch
+Bumped v3.2.1 → v3.2.2
+andrei@bump:test.sh ⚡ Test #74 ⇒  bump -in Dockerfile -patch -write
+Bumped v3.2.1 → v3.2.2 (saved to Dockerfile)
+andrei@bump:test.sh ⚡ Test #75 ⇒  grep 'LABEL version="v3.2.2"' Dockerfile
+LABEL version="v3.2.2"
+andrei@bump:test.sh ⚡ Test #76 ⇒  rm Dockerfile
+andrei@bump:test.sh ⚡ Test #77 ⇒  echo 'YXBpVmVyc2lvbjogdjIKbmFtZTogbXljaGFydAp2ZXJzaW9uOiAwLjEuMAo=' | base64 -d | tee Chart.yaml > /dev/null
+andrei@bump:test.sh ⚡ Test #78 ⇒  bump -in Chart.yaml -check
+0.1.0
+andrei@bump:test.sh ⚡ Test #79 ⇒  bump -in Chart.yaml -patch
+Bumped 0.1.0 → 0.1.1
+andrei@bump:test.sh ⚡ Test #80 ⇒  bump -in Chart.yaml -patch -write
+Bumped 0.1.0 → 0.1.1 (saved to Chart.yaml)
+andrei@bump:test.sh ⚡ Test #81 ⇒  grep 'version: 0.1.1' Chart.yaml
+version: 0.1.1
+andrei@bump:test.sh ⚡ Test #82 ⇒  rm Chart.yaml
+andrei@bump:test.sh ⚡ Test #83 ⇒  echo '<project><version>2.2.2</version></project>' > pom.xml
+andrei@bump:test.sh ⚡ Test #84 ⇒  bump -in pom.xml -check
+2.2.2
+andrei@bump:test.sh ⚡ Test #85 ⇒  bump -in pom.xml -patch
+Bumped 2.2.2 → 2.2.3
+andrei@bump:test.sh ⚡ Test #86 ⇒  bump -in pom.xml -patch -write
+Bumped 2.2.2 → 2.2.3 (saved to pom.xml)
+andrei@bump:test.sh ⚡ Test #87 ⇒  grep '<version>2.2.3</version>' pom.xml
+<project><version>2.2.3</version></project>
+andrei@bump:test.sh ⚡ Test #88 ⇒  rm pom.xml
+andrei@bump:test.sh ⚡ Test #89 ⇒  echo "v5.5.5" > VERSION
+andrei@bump:test.sh ⚡ Test #90 ⇒  BUMP_ALWAYS_WRITE=true bump -env
 BUMP_ALWAYS_WRITE=true
 BUMP_DEFAULT_INPUT=VERSION
 BUMP_NEVER_FIX=false
+BUMP_NO_RC=false
+BUMP_ALWAYS_FIX=false
 BUMP_NO_ALPHA=false
-run.99(BUMP_ALWAYS_WRITE=true bump -patch) - SUCCESS
-    output: Bumped v5.5.5 → v5.5.6 (saved to VERSION)
-run.100(grep 'v5.5.6' VERSION) - SUCCESS
-    output: v5.5.6
-run.101(BUMP_DEFAULT_INPUT=VERSION bump -minor) - SUCCESS
-    output: Bumped v5.5.6 → v5.6.0
-run.102(BUMP_DEFAULT_INPUT=VERSION bump -minor -write) - SUCCESS
-    output: Bumped v5.5.6 → v5.6.0 (saved to VERSION)
-run.103(grep 'v5.6.0' VERSION) - SUCCESS
-    output: v5.6.0
-run.104(rm VERSION) - SUCCESS
-All 104 tests PASS!
+BUMP_NO_BETA=false
+BUMP_NO_ALPHA_BETA=false
+BUMP_NO_PREVIEW=false
+BUMP_INIT_ON_NOT_FOUND=false
+andrei@bump:test.sh ⚡ Test #91 ⇒  BUMP_ALWAYS_WRITE=true bump -patch
+Bumped v5.5.5 → v5.5.6 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #92 ⇒  grep 'v5.5.6' VERSION
+v5.5.6
+andrei@bump:test.sh ⚡ Test #93 ⇒  BUMP_DEFAULT_INPUT=VERSION bump -minor
+Bumped v5.5.6 → v5.6.0
+andrei@bump:test.sh ⚡ Test #94 ⇒  BUMP_DEFAULT_INPUT=VERSION bump -minor -write
+Bumped v5.5.6 → v5.6.0 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #95 ⇒  grep 'v5.6.0' VERSION
+v5.6.0
+andrei@bump:test.sh ⚡ Test #96 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #97 ⇒  bump -parse v1.2.3-alpha.4 -init
+Initialized v1.2.3-alpha.4
+andrei@bump:test.sh ⚡ Test #98 ⇒  cat VERSION
+v1.2.3-alpha.4
+andrei@bump:test.sh ⚡ Test #99 ⇒  bump -parse v2.3.4-alpha.5 -write
+Parsed v2.3.4-alpha.5 (saved to VERSION)
+andrei@bump:test.sh ⚡ Test #100 ⇒  cat VERSION
+v2.3.4-alpha.5
+andrei@bump:test.sh ⚡ Test #101 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #102 ⇒  bump -parse v3.4.5-alpha.6 -init
+Initialized v3.4.5-alpha.6
+andrei@bump:test.sh ⚡ Test #103 ⇒  cat VERSION
+v3.4.5-alpha.6
+andrei@bump:test.sh ⚡ Test #104 ⇒  rm VERSION
+andrei@bump:test.sh ⚡ Test #105 ⇒  echo 'ewogICJuYW1lIjogIm15X3BhY2thZ2UiLAogICJkZXNjcmlwdGlvbiI6ICJtYWtlIHlvdXIgcGFja2FnZSBlYXNpZXIgdG8gZmluZCBvbiB0aGUgbnBtIHdlYnNpdGUiLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAic2NyaXB0cyI6IHsKICAgICJ0ZXN0IjogImVjaG8gXCJFcnJvcjogbm8gdGVzdCBzcGVjaWZpZWRcIiAmJiBleGl0IDEiCiAgfSwKICAicmVwb3NpdG9yeSI6IHsKICAgICJ0eXBlIjogImdpdCIsCiAgICAidXJsIjogImh0dHBzOi8vZ2l0aHViLmNvbS9tb25hdGhlb2N0b2NhdC9teV9wYWNrYWdlLmdpdCIKICB9LAogICJrZXl3b3JkcyI6IFtdLAogICJhdXRob3IiOiAiIiwKICAibGljZW5zZSI6ICJJU0MiLAogICJidWdzIjogewogICAgInVybCI6ICJodHRwczovL2dpdGh1Yi5jb20vbW9uYXRoZW9jdG9jYXQvbXlfcGFja2FnZS9pc3N1ZXMiCiAgfSwKICAiaG9tZXBhZ2UiOiAiaHR0cHM6Ly9naXRodWIuY29tL21vbmF0aGVvY3RvY2F0L215X3BhY2thZ2UiCn0=' | base64 -d | tee package.json > /dev/null
+andrei@bump:test.sh ⚡ Test #106 ⇒  cat package.json
+{
+  "name": "my_package",
+  "description": "make your package easier to find on the npm website",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/monatheoctocat/my_package.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/monatheoctocat/my_package/issues"
+  },
+  "homepage": "https://github.com/monatheoctocat/my_package"
+}
+andrei@bump:test.sh ⚡ Test #107 ⇒  bump -in package.json -check
+1.0.0
+andrei@bump:test.sh ⚡ Test #108 ⇒  bump -in package.json -fix
+Bumped 1.0.0 → 1.0.0
+andrei@bump:test.sh ⚡ Test #109 ⇒  bump -in package.json -fix -write
+Bumped 1.0.0 → 1.0.0 (saved to package.json)
+andrei@bump:test.sh ⚡ Test #110 ⇒  bump -in package.json -patch
+Bumped 1.0.0 → 1.0.1
+andrei@bump:test.sh ⚡ Test #111 ⇒  bump -in package.json -patch -write
+Bumped 1.0.0 → 1.0.1 (saved to package.json)
+andrei@bump:test.sh ⚡ Test #112 ⇒  grep '"version": "1.0.1"' package.json
+  "version": "1.0.1"
+andrei@bump:test.sh ⚡ Test #113 ⇒  bump -in package.json -json -minor
+{
+  "major": 1,
+  "minor": 1,
+  "patch": 0,
+  "alpha": 0,
+  "beta": 0,
+  "rc": 0,
+  "preview": 0,
+  "version": "1.1.0"
+}
+andrei@bump:test.sh ⚡ Test #114 ⇒  bump -in package.json -minor -write
+Bumped 1.0.1 → 1.1.0 (saved to package.json)
+andrei@bump:test.sh ⚡ Test #115 ⇒  grep '"version": "1.1.0"' package.json
+  "version": "1.1.0"
+andrei@bump:test.sh ⚡ Test #116 ⇒  cat package.json
+{
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/monatheoctocat/my_package/issues"
+  },
+  "description": "make your package easier to find on the npm website",
+  "homepage": "https://github.com/monatheoctocat/my_package",
+  "keywords": [],
+  "license": "ISC",
+  "name": "my_package",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/monatheoctocat/my_package.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" \u0026\u0026 exit 1"
+  },
+  "version": "1.1.0"
+}
+andrei@bump:test.sh ⚡ Test #117 ⇒  rm package.json
+All 117 tests PASS!
 ```
 
-### `/Users/andrei/work/bump/test-results/results.fuzz.md`
+### `/Users/andrei/work/bump/test-results/results.benchmark.md`
 
-Test results captured at 2025-07-28 07:53:25.
+Test results captured at 2025-08-02 11:41:43.
 
 ```log
-fuzz: elapsed: 0s, gathering baseline coverage: 0/182 completed
-fuzz: elapsed: 0s, gathering baseline coverage: 182/182 completed, now fuzzing with 14 workers
-fuzz: elapsed: 3s, execs: 657266 (219012/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 6s, execs: 1147687 (163521/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 9s, execs: 1543842 (132017/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 12s, execs: 1724503 (60219/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 15s, execs: 1798638 (24712/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 18s, execs: 1840749 (14037/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 21s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 24s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 27s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 30s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 33s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
-fuzz: elapsed: 34s, execs: 1840749 (0/sec), new interesting: 0 (total: 182)
+goos: darwin
+goarch: arm64
+pkg: github.com/andreimerlescu/bump/bump
+cpu: Apple M4 Pro
+BenchmarkScan-14    	 1890148	       619.2 ns/op	     248 B/op	       4 allocs/op
 PASS
-ok  	github.com/andreimerlescu/bump/bump	34.297s
+ok  	github.com/andreimerlescu/bump/bump	1.994s
 ```
 
 ### `/Users/andrei/work/bump/test-results/results.unit.md`
 
-Test results captured at 2025-08-01 12:30:41.
+Test results captured at 2025-08-02 11:41:43.
 
 ```log
-ok  	github.com/andreimerlescu/bump/bump	0.162s
+ok  	github.com/andreimerlescu/bump/bump	0.212s
 ```
 
+### `/Users/andrei/work/bump/test-results/results.fuzz.md`
 
+Test results captured at 2025-08-02 11:41:45.
+
+```log
+fuzz: elapsed: 0s, gathering baseline coverage: 0/291 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 291/291 completed, now fuzzing with 14 workers
+fuzz: elapsed: 3s, execs: 564900 (188297/sec), new interesting: 0 (total: 291)
+fuzz: elapsed: 4s, execs: 564900 (0/sec), new interesting: 0 (total: 291)
+PASS
+ok  	github.com/andreimerlescu/bump/bump	4.176s
+```
 

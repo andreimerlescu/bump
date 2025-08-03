@@ -16,17 +16,6 @@ The `bump` binary offers you `-json` for _JSON_ Encoded output.
 
 This repository was built using _end to end testing_ including unit tests, _fuzz_ testing, benchmark and integration tests. 
 
-## Demo of Bump
-
-When you run `make test-cli`, you will get a generated `test-results/results.cli.md` that will contain the output captured
-during this demo of the `bump` binary. Truly, I hope you enjoy using bump! It's a fun name, and I enjoyed writing it. 
-I hope you find good use for it!
-
-<video width="100%" controls poster="https://raw.githubusercontent.com/andreimerlescu/bump/refs/heads/master/bump.jpg">
-  <source src="https://raw.githubusercontent.com/andreimerlescu/bump/refs/heads/master/demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
 ### Version Format Priority
 
 The `bump` package can parse multiple version formats. To ensure accuracy, it checks for formats in a specific order, from most complex to least complex. This prevents a detailed pre-release version from being incorrectly identified as a simpler one.

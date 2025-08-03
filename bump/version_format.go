@@ -1,6 +1,9 @@
 package bump
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Format returns a formatted version string, allowing control over the 'v' prefix.
 func (v *Version) Format(withPrefix bool) string {
@@ -16,6 +19,10 @@ func (v *Version) format(withPrefix bool) string {
 	baseFormat := "%d.%d.%d"
 	if withPrefix && !v.noPrefix {
 		baseFormat = "v%d.%d.%d"
+	}
+
+	if strings.HasSuffix(v.path, "go.mod") {
+		v.useForm = FormG
 	}
 
 	// For shorthand forms, format back in the same style unless a full version is required.

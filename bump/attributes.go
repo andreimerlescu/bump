@@ -36,12 +36,15 @@ var SupportedFiles = []string{
 var (
 	reTwoPart   = regexp.MustCompile(`^(\d+)\.(\d+)$`)        // Two Part Version Only
 	reThreePart = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)$`) // Three Part Version Only
-	reFuzzy     = regexp.MustCompile(`^v?(\d+)\.(\d+).*`)     // Prefixed Two Part Version Only
 
 	// Regex for file-specific parsing/saving
-	reDockerfileVersion = regexp.MustCompile(`(LABEL\s+(?:org\.label-schema\.version|version)=")([^"]+)(")`) // Dockerfile Label
-	reGoModVersion      = regexp.MustCompile(`(go\s+)([0-9.]+)`)                                             // Go Mod Version
-	reMavenVersion      = regexp.MustCompile(`(?s)(<project.*?>.*?<version>)(.*?)(</version>)`)              // Maven Version
+
+	// Dockerfile Label
+	reDockerfileVersion = regexp.MustCompile(`(LABEL\s+(?:org\.label-schema\.version|version)=")([^"]+)(")`)
+	// Go Mod Version
+	reGoModVersion      = regexp.MustCompile(`(go\s+)([0-9.]+)`)
+	// Maven Version
+	reMavenVersion      = regexp.MustCompile(`(?s)(<project.*?>.*?<version>)(.*?)(</version>)`)
 )
 
 // Forms is a map of format strings to the expected number of scanned items.

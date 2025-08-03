@@ -108,6 +108,10 @@ func (v *Version) parseGoMod(content []byte) error {
 	if len(matches) < 3 {
 		return errors.New("could not find 'go' directive in go.mod")
 	}
+	// matches[0] "go 1.24"
+	// matches[1] = "go "
+	// matches[2] = "1.24"
+	v.useForm = FormG
 	return v.scan(matches[2])
 }
 
@@ -118,4 +122,12 @@ func (v *Version) parseMavenPom(content []byte) error {
 		return errors.New("could not find <version> tag inside <project> in pom.xml")
 	}
 	return v.scan(matches[2])
+}
+
+func (v *Version) parseIgo() error {
+	igoVersion, err := currentIgoVersion()
+	if err != nil {
+		return err
+	}
+	return v.parseVersion([]byte(igoVersion))
 }

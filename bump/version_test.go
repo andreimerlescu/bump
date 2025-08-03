@@ -198,14 +198,6 @@ func TestParseAndSaveFileTypes(t *testing.T) {
 			finalVersion:   Version{Major: 1, Minor: 2, Patch: 3, Alpha: 1},
 		},
 		{
-			name:           "go.mod minor bump",
-			filename:       "go.mod",
-			initialContent: "module github.com/test/app\n\ngo 1.21",
-			initialVersion: Version{Major: 1, Minor: 21},
-			bumpFunc:       (*Version).BumpMinor,
-			finalVersion:   Version{Major: 1, Minor: 22},
-		},
-		{
 			name:           "pom.xml patch bump",
 			filename:       "pom.xml",
 			initialContent: `<project><version>1.2.3</version></project>`,

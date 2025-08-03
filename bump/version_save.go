@@ -89,6 +89,10 @@ func (v *Version) saveDockerfile() error {
 // saveGoMod replaces in raw using regex reGoModVersion to replace the "go #.#[.#]" with the new version before sending
 // that to os.WriteFile on the provided path
 func (v *Version) saveGoMod() error {
+	err := v.parseIgo()
+	if err != nil {
+		return err
+	}
 	v.useForm = FormG
 	newVersion := v.format(false)
 	newContent := reGoModVersion.ReplaceAll(v.raw, []byte("${1}"+newVersion))

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,52 +10,77 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/andreimerlescu/bump/bump"
 )
 
+const (
+	envInitOnNotFound = "BUMP_INIT_ON_NOT_FOUND" // ENV create -in if not found
+	envDefaultInput   = "BUMP_DEFAULT_INPUT"     // ENV defines default -in
+	envNoAlphaBeta    = "BUMP_NO_ALPHA_BETA"     // ENV prevents -alpha -beta combo usage
+	envAlwaysWrite    = "BUMP_ALWAYS_WRITE"      // ENV always sets -write
+	envNoPreview      = "BUMP_NO_PREVIEW"        // ENV prevents -preview usage
+	envAlwaysFix      = "BUMP_ALWAYS_FIX"        // ENV always sets -fix
+	envNeverFix       = "BUMP_NEVER_FIX"         // ENV never allow -fix to be applied
+	envNoAlpha        = "BUMP_NO_ALPHA"          // ENV prevents -alpha usage
+	envNoBeta         = "BUMP_NO_BETA"           // ENV prevents -beta usage
+	envNoRC           = "BUMP_NO_RC"             // ENV prevents -rc usage
+
+	VFN = "VERSION"
+)
+
+// result stores the Version output as a string
 type result struct {
 	Version string `json:"version"`
 }
 
-const (
-	BinaryVersion = "v1.0.6"
+// binaryVersionBytes contains the embedded VERSION file's contents
+//
+//go:embed VERSION
+var binaryVersionBytes embed.FS
 
-	envAlwaysWrite    = "BUMP_ALWAYS_WRITE"
-	envDefaultInput   = "BUMP_DEFAULT_INPUT"
-	envNoAlphaBeta    = "BUMP_NO_ALPHA_BETA"
-	envNoAlpha        = "BUMP_NO_ALPHA"
-	envNoBeta         = "BUMP_NO_BETA"
-	envNoRC           = "BUMP_NO_RC"
-	envNoPreview      = "BUMP_NO_PREVIEW"
-	envNeverFix       = "BUMP_NEVER_FIX"
-	envInitOnNotFound = "BUMP_INIT_ON_NOT_FOUND"
-	envAlwaysFix      = "BUMP_ALWAYS_FIX"
-)
+// binaryCurrentVersion is defined by BinaryVersion() and contains the contents of
+// the VERSION file
+var binaryCurrentVersion string
+
+// BinaryVersion returns the embedded VERSION file of the igo repository as a string
+// and cache that value into binaryCurrentVersion once os.ReadFile is complete
+func BinaryVersion() string {
+	if len(binaryCurrentVersion) == 0 {
+		versionBytes, err := binaryVersionBytes.ReadFile(VFN)
+		if err != nil {
+			return "v0.0.0"
+		}
+		binaryCurrentVersion = strings.TrimSpace(string(versionBytes))
+	}
+	return binaryCurrentVersion
+}
 
 var (
-	initialInputFile = filepath.Join(".", "VERSION")
+	initialInputFile = filepath.Join(".", VFN)
 
-	inputFile string
+	shouldParse string // flag.StringVar -parse
+	inputFile   string // flag.StringVar -in
 
-	showAbout   bool
-	showEnv     bool
-	showVersion bool
-	major       bool
-	minor       bool
-	patch       bool
-	alpha       bool
-	beta        bool
-	rc          bool
-	shouldParse string
-	shouldInit  bool
-	shouldFix   bool
-	preview     bool
-	checkFile   bool
-	useJson     bool
-	writeInput  bool
+	showVersion bool // flag.BoolVar -v
+	shouldInit  bool // flag.BoolVar -init
+	writeInput  bool // flag.BoolVar -write
+	showAbout   bool // flag.BoolVar -about
+	shouldFix   bool // flag.BoolVar -fix
+	checkFile   bool // flag.BoolVar -check
+	showEnv     bool // flag.BoolVar -env
+	useJson     bool // flag.BoolVar -json
+	preview     bool // flag.BoolVar -preview
+	major       bool // flag.BoolVar -major
+	minor       bool // flag.BoolVar -minor
+	patch       bool // flag.BoolVar -patch
+	alpha       bool // flag.BoolVar -alpha
+	beta        bool // flag.BoolVar -beta
+	rc          bool // flag.BoolVar -rc
 )
 
+// appEnv renders a KEY=VAL\nKEY=VAL\n string of bump ENV variable customization options
 func appEnv(indent string) string {
 	var out strings.Builder
 	defaultInput := envVal(envDefaultInput, initialInputFile)
@@ -75,6 +101,7 @@ func appEnv(indent string) string {
 	return out.String()
 }
 
+// envIs combines os.LookupEnv to strconv.ParseBool
 func envIs(name string) bool {
 	v, ok := os.LookupEnv(name)
 	if !ok {
@@ -84,6 +111,7 @@ func envIs(name string) bool {
 	return err == nil && vb
 }
 
+// envVal combines os.LookupEnv to fallback
 func envVal(name, fallback string) string {
 	if v, ok := os.LookupEnv(name); ok {
 		return v
@@ -91,9 +119,10 @@ func envVal(name, fallback string) string {
 	return fallback
 }
 
+// about prints a helpful bump usage description to STDOUT
 func about() {
 	var out strings.Builder
-	out.WriteString("Bump Version: " + BinaryVersion + "\n")
+	out.WriteString("Bump Version: " + BinaryVersion() + "\n")
 	out.WriteString("Usage:\n")
 	out.WriteString("  bump -check [-in=FILE]\n")
 	out.WriteString("  bump -fix [-write] [-in=FILE]\n")
@@ -109,19 +138,16 @@ func about() {
 	fmt.Print(out.String())
 }
 
-func main() {
-	config()
+var versionCalls = atomic.Int64{}
 
-	if envIs(envAlwaysFix) && envIs(envNeverFix) {
-		_, _ = fmt.Fprintf(os.Stderr, "env %s and %s cannot be used together", envAlwaysFix, envNeverFix)
-		os.Exit(1)
+func NewVersion() *bump.Version {
+	if versionCalls.Load() > 3 {
+		return nil
 	}
-
-retry:
-	version := bump.New()
-	err := version.LoadFile(inputFile)
+	v := bump.New()
+	err := v.LoadFile(inputFile)
 	if err != nil {
-		if strings.HasSuffix(inputFile, "VERSION") && os.IsNotExist(err) && (envIs(envInitOnNotFound) || shouldInit) {
+		if strings.HasSuffix(inputFile, VFN) && os.IsNotExist(err) && (envIs(envInitOnNotFound) || shouldInit) {
 			var err2 error
 			if len(shouldParse) > 0 {
 				err2 = os.WriteFile(inputFile, []byte(shouldParse), 0644)
@@ -131,26 +157,27 @@ retry:
 			if err2 != nil {
 				log.Fatal(err2)
 			}
-			goto retry
+			versionCalls.Add(1)
+			return NewVersion()
 		}
 		_, _ = fmt.Fprintln(os.Stderr, "Error reading file:", err)
 		os.Exit(1)
 	}
 
 	if len(shouldParse) > 0 {
-		version.SetRaw([]byte(shouldParse))
+		v.SetRaw([]byte(shouldParse))
 	}
 
 	// If -fix is requested, attempt to fix the version before parsing.
 	if shouldFix {
-		if err := version.Fix(); err != nil {
+		if err := v.Fix(); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, "Error fixing version:", err)
 			os.Exit(1)
 		}
 	}
 
 	// Now, parse the (potentially fixed) version string.
-	if err = version.Parse(); err != nil {
+	if err = v.Parse(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Error parsing version:", err)
 		// If fix was not requested but might have helped, suggest it.
 		if !shouldFix {
@@ -160,6 +187,21 @@ retry:
 				_, _ = fmt.Fprintln(os.Stderr, "Hint: the version string may be fixable with the -fix flag.")
 			}
 		}
+		os.Exit(1)
+	}
+	if envIs(envAlwaysFix) && envIs(envNeverFix) {
+		_, _ = fmt.Fprintf(os.Stderr, "env %s and %s cannot be used together", envAlwaysFix, envNeverFix)
+		os.Exit(1)
+	}
+	return v
+}
+
+func main() {
+	config()
+	versionCalls.Store(0)
+	version := NewVersion()
+	if version == nil {
+		fmt.Println("version is nil")
 		os.Exit(1)
 	}
 
@@ -181,13 +223,16 @@ retry:
 		run(version)
 	}
 
-	newVersionStr := version.Format(!version.NoPrefix())
+	newVersionStr := version.Format(version.NoPrefix() == false)
 	version.Version = newVersionStr // For JSON output
-	wasBumped := !strings.EqualFold(originalVersionStr, newVersionStr) || !strings.EqualFold(newVersionStr, shouldParse) || shouldInit
+	noChange := !strings.EqualFold(originalVersionStr, newVersionStr)
+	wasParsed := !strings.EqualFold(newVersionStr, shouldParse)
+	wasBumped := noChange || wasParsed || shouldInit
 
 	finish(version, wasBumped, bumpFlags, originalVersionStr, newVersionStr)
 }
 
+// config gets the flag environment set up, parses if we are showing version, about, or env.
 func config() {
 	// input actions
 	defaultInput := envVal(envDefaultInput, initialInputFile)
@@ -217,7 +262,7 @@ func config() {
 	flag.Parse()
 
 	if showVersion {
-		fmt.Println(BinaryVersion)
+		fmt.Println(BinaryVersion())
 		os.Exit(0)
 	}
 	if showEnv {
@@ -236,6 +281,7 @@ func config() {
 
 }
 
+// validate attempts to count the number of bump commands being executed
 func validate() (int, error) {
 	bumpFlags := 0
 	if major {
@@ -274,6 +320,7 @@ func validate() (int, error) {
 	return bumpFlags + preReleaseFlags, nil
 }
 
+// run executes the bump commands using the bump package
 func run(version *bump.Version) {
 	if major {
 		version.BumpMajor()
@@ -298,6 +345,7 @@ func run(version *bump.Version) {
 	}
 }
 
+// finish prints the summary output of the bump request
 func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersion, newVersion string) {
 	if useJson {
 		printJson(version)
@@ -346,12 +394,16 @@ func finish(version *bump.Version, wasBumped bool, bumpFlags int, originalVersio
 	}
 }
 
+// printJson uses check() on the error and prints to STDOUT the Indented JSON output
 func printJson(data interface{}) {
 	output, err := json.MarshalIndent(data, "", "  ")
 	check(err)
 	fmt.Println(string(output))
 }
 
+// check a variable assigned a func type can be redefined but falls through the logic when an err
+// needs to be verified if nil or not. If this is an error, then we'll write to STDERR, otherwise,
+// we write to STDOUT.
 var check = func(this any) {
 	switch t := this.(type) {
 	case error:

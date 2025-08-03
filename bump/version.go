@@ -7,12 +7,14 @@ import (
 
 // Version is a struct that is used to describe a VERSION file
 type Version struct {
-	mu       *sync.RWMutex          // used for protecting the parsed map in concurrent settings
-	parsed   map[string]interface{} // contains unmarshal'd json|yaml|toml|ini key=>value pairs
-	path     string                 // path to the source of the Version
-	raw      []byte                 // raw file contents of Version file path
-	noPrefix bool                   // control whether "v" is prepended to the SemVer
-	useForm  string                 // control which format to use for rendering the version
+	mu         *sync.RWMutex          // used for protecting the parsed map in concurrent settings
+	parsed     map[string]interface{} // contains unmarshal'd json|yaml|toml|ini key=>value pairs
+	path       string                 // path to the source of the Version
+	raw        []byte                 // raw file contents of Version file path
+	noPrefix   bool                   // control whether "v" is prepended to the SemVer
+	useForm    string                 // control which format to use for rendering the version
+	isIgo      bool                   // determine whether or not igo is used
+	igoVersion string                 // stored igo version
 
 	Major   int    `json:"major"`
 	Minor   int    `json:"minor"`
@@ -78,52 +80,58 @@ func (v *Version) NoPrefix() bool {
 }
 
 // Compare is used to compare different Version structs for comparison
-func (v *Version) Compare(other *Version) int {
+func (v *Version) Compare(o *Version) int {
 	v.safety()
-	if v.Major != other.Major {
-		if v.Major > other.Major {
+	if v.Major != o.Major {
+		if v.Major > o.Major {
 			return 1
 		}
 		return -1
 	}
-	if v.Minor != other.Minor {
-		if v.Minor > other.Minor {
+	if v.Minor != o.Minor {
+		if v.Minor > o.Minor {
 			return 1
 		}
 		return -1
 	}
-	if v.Patch != other.Patch {
-		if v.Patch > other.Patch {
+	if v.Patch != o.Patch {
+		if v.Patch > o.Patch {
 			return 1
 		}
 		return -1
 	}
 
-	vIsPre := v.Preview > 0 || v.RC > 0 || v.Beta > 0 || v.Alpha > 0
-	otherIsPre := other.Preview > 0 || other.RC > 0 || other.Beta > 0 || other.Alpha > 0
+	var (
+		vIsPre     = v.Preview > 0 || v.RC > 0 || v.Beta > 0 || v.Alpha > 0
+		otherIsPre = o.Preview > 0 || o.RC > 0 || o.Beta > 0 || o.Alpha > 0
 
-	if !vIsPre && otherIsPre {
+		check1 = vIsPre == false && otherIsPre == true
+		check2 = vIsPre == true && otherIsPre == false
+		check3 = vIsPre == false && otherIsPre == false
+	)
+
+	if check1 {
 		return 1
 	}
-	if vIsPre && !otherIsPre {
+	if check2 {
 		return -1
 	}
-	if !vIsPre && !otherIsPre {
+	if check3 {
 		return 0
 	}
 
 	// Both are pre-releases, compare them
-	if v.Preview != other.Preview {
-		return compareInt(v.Preview, other.Preview)
+	if v.Preview != o.Preview {
+		return compareInt(v.Preview, o.Preview)
 	}
-	if v.RC != other.RC {
-		return compareInt(v.RC, other.RC)
+	if v.RC != o.RC {
+		return compareInt(v.RC, o.RC)
 	}
-	if v.Beta != other.Beta {
-		return compareInt(v.Beta, other.Beta)
+	if v.Beta != o.Beta {
+		return compareInt(v.Beta, o.Beta)
 	}
-	if v.Alpha != other.Alpha {
-		return compareInt(v.Alpha, other.Alpha)
+	if v.Alpha != o.Alpha {
+		return compareInt(v.Alpha, o.Alpha)
 	}
 	return 0
 }

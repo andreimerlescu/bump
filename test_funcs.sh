@@ -14,6 +14,8 @@ declare empty_chart_yaml
 empty_chart_yaml="YXBpVmVyc2lvbjogdjIKbmFtZTogbXljaGFydAp2ZXJzaW9uOiAwLjEuMAo="
 export empty_chart_yaml
 
+declare counterName
+
 function safe_exit() {
     local msg="${1}"
     echo -e "${msg}"
@@ -23,7 +25,7 @@ function safe_exit() {
 function run() {
   local cmd="${1}"
   local -i testNo
-  testNo=$(counter -name $counterName -add || safe_exit "failed to increase counter")
+  testNo=$(counter -name "${counterName}" -add || safe_exit "failed to increase counter")
   local -i exitCode
   local output
 
@@ -32,7 +34,7 @@ function run() {
   exitCode=$?
 
   local prefix
-  prefix="$(purple "$(whoami)")@$(yellow bump):$(blue "$(basename "${0}")")"
+  prefix="$(magenta "$(whoami)")@$(yellow bump.git):$(purple "$(basename "${0}")")"
 
   if (( exitCode == 0 )); then
     printf "%s ⚡ %s ⇒  %s\n" "${prefix}" "$(cyan "Test #${testNo}")" "$(green "${cmd}")"
@@ -59,9 +61,9 @@ function new_package_json() {
 }
 
 function red() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;31m${1}\033[0m"; else echo "${1}"; fi; }
-function blue() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;34m${1}\033[0m";  else echo "${1}"; fi;}
+function purple() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;34m${1}\033[0m";  else echo "${1}"; fi;}
 function green() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;32m${1}\033[0m";  else echo "${1}"; fi;}
-function purple() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;35m${1}\033[0m";  else echo "${1}"; fi;}
+function magenta() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[0;35m${1}\033[0m";  else echo "${1}"; fi;}
 function yellow() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[1;33m${1}\033[0m";  else echo "${1}"; fi;}
 function cyan() { if [ "${NO_COLOR}" == "false" ]; then echo -e "\033[1;36m${1}\033[0m";  else echo "${1}"; fi;}
 

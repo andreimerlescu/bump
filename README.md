@@ -249,12 +249,11 @@ make test-fuzz      # 3s run
 make test-fuzz-long # 30s run
 ```
 
+### Results
+
 ```log
 Testing CLI... SUCCESS! Took 3 (s)! Wrote results.cli.md (size: 12K )
 Testing Unit... SUCCESS! Took 1 (s)! Wrote results.unit.md ( size: 4.0K )
 Testing Benchmark... SUCCESS! Took 2 (s)! Wrote results.benchmark.md ( size: 4.0K )
 Testing Fuzz... SUCCESS! Took 33 (s)! Wrote results.fuzz.md ( size: 4.0K )
 ```
-
-### Results
-

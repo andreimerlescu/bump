@@ -16,6 +16,8 @@ The `bump` binary offers you `-json` for _JSON_ Encoded output.
 
 This repository was built using _end to end testing_ including unit tests, _fuzz_ testing, benchmark and integration tests. 
 
+[Ahoy!](/AHOY.md)
+
 ### Version Format Priority
 
 The `bump` package can parse multiple version formats. To ensure accuracy, it checks for formats in a specific order, from most complex to least complex. This prevents a detailed pre-release version from being incorrectly identified as a simpler one.

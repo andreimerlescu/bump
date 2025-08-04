@@ -124,6 +124,8 @@ func (v *Version) parseMavenPom(content []byte) error {
 	return v.scan(matches[2])
 }
 
+// parseIgo reads ~/go/version from the IGO "golang version manager" and uses that version for
+// a -fix on an -in go.mod file that needs to be corrected
 func (v *Version) parseIgo() error {
 	igoVersion, err := currentIgoVersion()
 	if err != nil {

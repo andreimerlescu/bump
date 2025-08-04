@@ -1,12 +1,10 @@
 #!/bin/bash
 
+declare counterName
+counterName="bump-test-passes"
+export counterName
+
 export IN_TEST_FILE=1
-
-[ ! -f test_funcs.sh ] && { echo "Missing test_funcs.sh script!"; exit 1; }
-source test_funcs.sh
-
-[ ! -f test_scenarios.sh ] && safe_exit "Missing test_scenario.sh script!"
-source test_scenarios.sh
 
 declare NO_COLOR
 NO_COLOR="${NO_COLOR:-false}"
@@ -24,10 +22,13 @@ export COUNTER_ALWAYS_YES=1
 declare COUNTER_DIR
 export COUNTER_DIR
 
-declare counterName
-counterName="bump-test-passes"
-export counterName
 counter -name $counterName -reset -yes 1> /dev/null || safe_exit "failed to reset counter"
+
+[ ! -f test_funcs.sh ] && { echo "Missing test_funcs.sh script!"; exit 1; }
+source test_funcs.sh
+
+[ ! -f test_scenarios.sh ] && safe_exit "Missing test_scenario.sh script!"
+source test_scenarios.sh
 
 echo "Preparing test env..."
 mkdir -p test-data || safe_exit "failed to mkdir test-data"

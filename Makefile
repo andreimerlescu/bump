@@ -88,8 +88,26 @@ CLI_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.cli.md"
 UNIT_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.unit.md"
 FUZZ_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.fuzz.md"
 BENCH_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.benchmark.md"
+INTEGRATION_LOG="$(MAIN_PATH)/$(TEST_DIR)/results.integration.md"
 
-test: test-cli test-unit test-bench test-fuzz
+test: test-cli test-unit test-bench test-fuzz test-integration
+
+test-integration: $(TEST_DIR)
+	@printf "%s" "Testing Integration... "
+	@touch $(INTEGRATION_LOG)
+	@echo "### \`$(INTEGRATION_LOG)\` \n\n Test results captured at $(shell date +"%Y-%m-%d %H:%M:%S"). \n\n\`\`\`log" > $(INTEGRATION_LOG)
+	@start_time=$$(date +%s); \
+	go test -vet=all -count=1 -tags=integration -run TestEnv . >> $(INTEGRATION_LOG); \
+	test_result=$$?; \
+	end_time=$$(date +%s); \
+	elapsed=$$((end_time - start_time)); \
+	if [ $$test_result -eq 1 ]; then \
+		echo "FAILED!"; \
+		exit 1; \
+	fi; \
+	echo "\`\`\`" >> $(INTEGRATION_LOG); \
+	echo "" >> $(INTEGRATION_LOG); \
+	echo "SUCCESS! Took $$elapsed (s)! Wrote $(shell basename "$(INTEGRATION_LOG)") ( size: $(shell du -h "$(INTEGRATION_LOG)" | awk '{print $$1}') )"
 
 test-cli:
 	@printf "%s" "Testing CLI... "

@@ -1,14 +1,14 @@
-### `/Users/andrei/work/bump/test-results/results.benchmark.md` 
+### `/Users/andrei/work/personal/bump/test-results/results.benchmark.md` 
 
- Test results captured at 2025-08-04 07:39:09. 
+ Test results captured at 2026-04-20 22:03:11. 
 
 ```log
 goos: darwin
 goarch: arm64
 pkg: github.com/andreimerlescu/bump/bump
-cpu: Apple M4 Pro
-BenchmarkScan-14    	 1876750	       635.6 ns/op	     264 B/op	       4 allocs/op
+cpu: Apple M3 Ultra
+BenchmarkScan-28    	 1409971	       845.0 ns/op	     264 B/op	       4 allocs/op
 PASS
-ok  	github.com/andreimerlescu/bump/bump	2.008s
+ok  	github.com/andreimerlescu/bump/bump	2.273s
 ```
 

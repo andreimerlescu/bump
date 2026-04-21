@@ -16,8 +16,6 @@ The `bump` binary offers you `-json` for _JSON_ Encoded output.
 
 This repository was built using _end to end testing_ including unit tests, _fuzz_ testing, benchmark and integration tests. 
 
-[Ahoy!](/AHOY.md)
-
 ### Version Format Priority
 
 The `bump` package can parse multiple version formats. To ensure accuracy, it checks for formats in a specific order, from most complex to least complex. This prevents a detailed pre-release version from being incorrectly identified as a simpler one.
@@ -259,3 +257,19 @@ Testing Unit... SUCCESS! Took 1 (s)! Wrote results.unit.md ( size: 4.0K )
 Testing Benchmark... SUCCESS! Took 2 (s)! Wrote results.benchmark.md ( size: 4.0K )
 Testing Fuzz... SUCCESS! Took 33 (s)! Wrote results.fuzz.md ( size: 4.0K )
 ```
+
+### Using Bump `VERSION` in your projects!
+
+    bump -write -init
+    bump -write -patch
+    bump -write -minor # etc 
+
+Once you've created your `VERSION` file, you can easily use it in your Go packages: 
+
+    //go:embed VERSION
+    var versionBytes []byte  // same as englishBytes pattern above
+
+    func Version() string {
+        return strings.TrimSpace(string(versionBytes))
+    }
+

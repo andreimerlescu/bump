@@ -1,13 +1,13 @@
-### `/Users/andrei/work/bump/test-results/results.fuzz.md` 
+### `/Users/andrei/work/personal/bump/test-results/results.fuzz.md` 
 
- Test results captured at 2025-08-04 07:39:11. 
+ Test results captured at 2026-04-20 22:03:14. 
 
 ```log
-fuzz: elapsed: 0s, gathering baseline coverage: 0/295 completed
-fuzz: elapsed: 0s, gathering baseline coverage: 295/295 completed, now fuzzing with 14 workers
-fuzz: elapsed: 3s, execs: 620297 (206755/sec), new interesting: 0 (total: 295)
-fuzz: elapsed: 4s, execs: 620297 (0/sec), new interesting: 0 (total: 295)
+fuzz: elapsed: 0s, gathering baseline coverage: 0/214 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 214/214 completed, now fuzzing with 28 workers
+fuzz: elapsed: 3s, execs: 925508 (308479/sec), new interesting: 0 (total: 214)
+fuzz: elapsed: 4s, execs: 925508 (0/sec), new interesting: 0 (total: 214)
 PASS
-ok  	github.com/andreimerlescu/bump/bump	4.206s
+ok  	github.com/andreimerlescu/bump/bump	4.299s
 ```
 

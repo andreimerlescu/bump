@@ -282,6 +282,7 @@ func config() {
 }
 
 // validate attempts to count the number of bump commands being executed
+// validate attempts to count the number of bump commands being executed
 func validate() (int, error) {
 	bumpFlags := 0
 	if major {
@@ -293,31 +294,79 @@ func validate() (int, error) {
 	if patch {
 		bumpFlags++
 	}
-	// Pre-release bumps can be combined with major/minor/patch, but not with each other.
+
 	preReleaseFlags := 0
-	if alpha && !envIs(envNoAlpha) && !envIs(envNoAlphaBeta) {
-		preReleaseFlags++
+	preReleaseSuppressed := 0
+
+	if alpha {
+		if envIs(envNoAlpha) || envIs(envNoAlphaBeta) {
+			preReleaseSuppressed++
+		} else {
+			preReleaseFlags++
+		}
 	}
-	if beta && !envIs(envNoBeta) && !envIs(envNoAlphaBeta) {
-		preReleaseFlags++
+	if beta {
+		if envIs(envNoBeta) || envIs(envNoAlphaBeta) {
+			preReleaseSuppressed++
+		} else {
+			preReleaseFlags++
+		}
 	}
-	if rc && !envIs(envNoRC) {
-		preReleaseFlags++
+	if rc {
+		if envIs(envNoRC) {
+			preReleaseSuppressed++
+		} else {
+			preReleaseFlags++
+		}
 	}
-	if preview && !envIs(envNoPreview) {
-		preReleaseFlags++
+	if preview {
+		if envIs(envNoPreview) {
+			preReleaseSuppressed++
+		} else {
+			preReleaseFlags++
+		}
+	}
+
+	// If every requested pre-release bump was suppressed by env vars and no
+	// major/minor/patch was requested, tell the user explicitly rather than
+	// silently doing nothing.
+	if preReleaseSuppressed > 0 && preReleaseFlags == 0 && bumpFlags == 0 {
+		var suppressed []string
+		if alpha && (envIs(envNoAlpha) || envIs(envNoAlphaBeta)) {
+			suppressed = append(suppressed, fmt.Sprintf("-alpha (suppressed by %s)", whichEnv(envNoAlpha, envNoAlphaBeta)))
+		}
+		if beta && (envIs(envNoBeta) || envIs(envNoAlphaBeta)) {
+			suppressed = append(suppressed, fmt.Sprintf("-beta (suppressed by %s)", whichEnv(envNoBeta, envNoAlphaBeta)))
+		}
+		if rc && envIs(envNoRC) {
+			suppressed = append(suppressed, fmt.Sprintf("-rc (suppressed by %s)", envNoRC))
+		}
+		if preview && envIs(envNoPreview) {
+			suppressed = append(suppressed, fmt.Sprintf("-preview (suppressed by %s)", envNoPreview))
+		}
+		return 0, fmt.Errorf("all requested bump operations were suppressed by environment variables: %s\nRun 'bump -env' to see current environment configuration",
+			strings.Join(suppressed, ", "))
 	}
 
 	if bumpFlags > 1 {
 		return 0, fmt.Errorf("only one of -major, -minor, or -patch can be used at a time")
 	}
 	if preReleaseFlags > 1 {
-		// Exception: allow alpha and beta to be combined
 		if !(preReleaseFlags == 2 && (alpha && beta)) {
 			return 0, fmt.Errorf("only one pre-release bump can be used at a time (e.g., -alpha, -beta)")
 		}
 	}
 	return bumpFlags + preReleaseFlags, nil
+}
+
+// whichEnv returns the first env var name from the list that is currently set to true.
+func whichEnv(names ...string) string {
+	for _, n := range names {
+		if envIs(n) {
+			return n
+		}
+	}
+	return ""
 }
 
 // run executes the bump commands using the bump package

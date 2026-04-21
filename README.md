@@ -2,6 +2,11 @@
 
 ![Bump](/bump.jpg)
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/andreimerlescu/bump.svg)](https://pkg.go.dev/github.com/andreimerlescu/bump)
+[![Go Report Card](https://goreportcard.com/badge/github.com/andreimerlescu/bump)](https://goreportcard.com/report/github.com/andreimerlescu/bump)
+[![CI](https://github.com/andreimerlescu/bump/actions/workflows/go-bump.yml/badge.svg)](https://github.com/andreimerlescu/bump/actions/workflows/go-bump.yml)
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 This package is designed to take a string, like `v1.0.0` and allow you to `bump` it with the command line.
 
 The `-in` argument is the **Input File** and it defaults to `./VERSION` from the _current working directory_ of where `bump` is being invoked.
@@ -42,7 +47,7 @@ Alternative method:
 
 ```bash
 [ ! -d ~/bin ] && mkdir -p ~/bin
-curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.0.0/bump-darwin-arm64 -o ~/bin/bump
+curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.1.0/bump-darwin-arm64 -o ~/bin/bump
 chmod +x ~/bin/bump
 ```
 
@@ -50,7 +55,7 @@ chmod +x ~/bin/bump
 
 ```bash
 [ ! -d ~/bin ] && mkdir -p ~/bin
-curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.0.0/bump-darwin-amd64 -o ~/bin/bump
+curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.1.0/bump-darwin-amd64 -o ~/bin/bump
 chmod +x ~/bin/bump
 ```
 
@@ -58,7 +63,7 @@ chmod +x ~/bin/bump
 
 ```bash
 [ ! -d ~/bin ] && mkdir -p ~/bin
-curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.0.0/bump-linux-amd64 -o ~/bin/bump
+curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.1.0/bump-linux-amd64 -o ~/bin/bump
 chmod +x ~/bin/bump
 ```
 
@@ -66,7 +71,7 @@ chmod +x ~/bin/bump
 
 ```bash
 [ ! -d ~/bin ] && mkdir -p ~/bin
-curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.0.0/bump.exe -o ~/bin/bump.exe
+curl -sL https://github.com/andreimerlescu/bump/releases/download/v1.1.0/bump.exe -o ~/bin/bump.exe
 ```
 
 ## Usage
@@ -111,7 +116,7 @@ bump -about
 ```
 
 ```log
-Bump Version: v1.0.6
+Bump Version: v1.1.0
 Usage:
   bump -check [-in=FILE]
   bump -fix [-write] [-in=FILE]
@@ -126,17 +131,16 @@ Supported File Types:
 Defaults: 
   -in=VERSION [default: VERSION]
 Environment Variables:
-  BUMP_NO_PREVIEW=false
-  BUMP_INIT_ON_NOT_FOUND=false
-  BUMP_DEFAULT_INPUT=VERSION
-  BUMP_NO_ALPHA=false
   BUMP_NO_BETA=false
   BUMP_NO_RC=false
+  BUMP_INIT_ON_NOT_FOUND=false
   BUMP_ALWAYS_FIX=false
   BUMP_ALWAYS_WRITE=false
-  BUMP_NEVER_FIX=false
+  BUMP_DEFAULT_INPUT=VERSION
+  BUMP_NO_ALPHA=false
   BUMP_NO_ALPHA_BETA=false
-
+  BUMP_NO_PREVIEW=false
+  BUMP_NEVER_FIX=false
 ```
 
 ## Environment

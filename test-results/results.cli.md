@@ -1,6 +1,6 @@
-### `/Users/andrei/work/bump/test-results/results.cli.md` 
+### `/Users/andrei/work/personal/bump/test-results/results.cli.md` 
 
- Test results captured at 2025-08-04 07:39:06. 
+ Test results captured at 2026-04-20 22:03:05. 
 
 ```log
 Preparing test env...
@@ -128,7 +128,7 @@ andrei@bump.git:test.sh ⚡ Test #62 ⇒  bump -json -beta
   "beta": 1,
   "rc": 0,
   "preview": 0,
-  "version": "v1.0.0-alpha.0"
+  "version": "v1.0.0-beta.1"
 }
 andrei@bump.git:test.sh ⚡ Test #63 ⇒  cat VERSION
 v1.0.0
@@ -141,10 +141,10 @@ andrei@bump.git:test.sh ⚡ Test #64 ⇒  bump -json -beta -write
   "beta": 1,
   "rc": 0,
   "preview": 0,
-  "version": "v1.0.0-alpha.0"
+  "version": "v1.0.0-beta.1"
 }
 andrei@bump.git:test.sh ⚡ Test #65 ⇒  cat VERSION
-v1.0.0-alpha.0
+v1.0.0-beta.1
 andrei@bump.git:test.sh ⚡ Test #66 ⇒  rm VERSION
 andrei@bump.git:test.sh ⚡ Test #67 ⇒  echo 'eyJuYW1lIjoidGVzdCIsInZlcnNpb24iOiIxLjIuMyJ9' | base64 -d | tee package.json > /dev/null
 andrei@bump.git:test.sh ⚡ Test #68 ⇒  cat package.json
@@ -241,16 +241,16 @@ andrei@bump.git:test.sh ⚡ Test #112 ⇒  grep '<version>2.2.3</version>' pom.x
 andrei@bump.git:test.sh ⚡ Test #113 ⇒  rm pom.xml
 andrei@bump.git:test.sh ⚡ Test #114 ⇒  echo "v5.5.5" > VERSION
 andrei@bump.git:test.sh ⚡ Test #115 ⇒  BUMP_ALWAYS_WRITE=true bump -env
+BUMP_ALWAYS_WRITE=true
+BUMP_DEFAULT_INPUT=VERSION
 BUMP_NEVER_FIX=false
 BUMP_NO_ALPHA=false
-BUMP_NO_BETA=false
 BUMP_NO_ALPHA_BETA=false
 BUMP_NO_RC=false
-BUMP_DEFAULT_INPUT=VERSION
+BUMP_NO_BETA=false
 BUMP_NO_PREVIEW=false
 BUMP_INIT_ON_NOT_FOUND=false
 BUMP_ALWAYS_FIX=false
-BUMP_ALWAYS_WRITE=true
 andrei@bump.git:test.sh ⚡ Test #116 ⇒  BUMP_ALWAYS_WRITE=true bump -patch
 Bumped v5.5.5 → v5.5.6 (saved to VERSION)
 andrei@bump.git:test.sh ⚡ Test #117 ⇒  grep 'v5.5.6' VERSION

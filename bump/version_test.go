@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -270,5 +271,190 @@ func BenchmarkScan(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		_ = v.scan(rawVersion)
+	}
+}
+
+// TestBumpAlphaFromCleanVersion tests bumping alpha on a version with no pre-release tag.
+// This is scenario_01 from the CLI tests — the case the unit tests currently miss entirely.
+func TestBumpAlphaFromCleanVersion(t *testing.T) {
+	v, err := Parse("v1.0.0")
+	assert.NoError(t, err)
+	assert.Equal(t, FormA, v.useForm, "clean version should parse as FormA")
+
+	v.BumpAlpha()
+
+	assert.Equal(t, 1, v.Alpha, "Alpha should be 1")
+	assert.Equal(t, FormB, v.useForm, "useForm should be FormB after BumpAlpha on clean version")
+	assert.Equal(t, "v1.0.0-alpha.1", v.String(), "formatted string should be v1.0.0-alpha.1")
+	assert.Equal(t, "v1.0.0-alpha.1", v.Format(true), "Format(true) should be v1.0.0-alpha.1")
+}
+
+// TestBumpBetaFromCleanVersion tests bumping beta on a version with no pre-release tag.
+func TestBumpBetaFromCleanVersion(t *testing.T) {
+	v, err := Parse("v1.0.0")
+	assert.NoError(t, err)
+
+	v.BumpBeta()
+
+	assert.Equal(t, 1, v.Beta, "Beta should be 1")
+	assert.Equal(t, FormC, v.useForm, "useForm should be FormC after BumpBeta")
+	assert.Equal(t, "v1.0.0-beta.1", v.String(), "formatted string should be v1.0.0-beta.1")
+}
+
+// TestBumpFormattedOutput tests that all bump operations produce correct formatted strings,
+// not just correct field values. This is the critical gap in the existing tests.
+func TestBumpFormattedOutput(t *testing.T) {
+	testCases := []struct {
+		name       string
+		input      string
+		bumpFunc   func(*Version)
+		expected   string
+		expectForm string
+	}{
+		{
+			name:       "alpha from clean version",
+			input:      "v1.0.0",
+			bumpFunc:   (*Version).BumpAlpha,
+			expected:   "v1.0.0-alpha.1",
+			expectForm: FormB,
+		},
+		{
+			name:       "alpha from existing alpha",
+			input:      "v1.0.0-alpha.3",
+			bumpFunc:   (*Version).BumpAlpha,
+			expected:   "v1.0.0-alpha.4",
+			expectForm: FormB,
+		},
+		{
+			name:       "alpha from alpha.0",
+			input:      "v1.0.0-alpha.0",
+			bumpFunc:   (*Version).BumpAlpha,
+			expected:   "v1.0.0-alpha.1",
+			expectForm: FormB,
+		},
+		{
+			name:       "beta from clean version",
+			input:      "v1.0.0",
+			bumpFunc:   (*Version).BumpBeta,
+			expected:   "v1.0.0-beta.1",
+			expectForm: FormC,
+		},
+		{
+			name:       "beta from existing beta",
+			input:      "v1.0.0-beta.4",
+			bumpFunc:   (*Version).BumpBeta,
+			expected:   "v1.0.0-beta.5",
+			expectForm: FormC,
+		},
+		{
+			name:       "patch from clean version",
+			input:      "v1.0.0",
+			bumpFunc:   (*Version).BumpPatch,
+			expected:   "v1.0.1",
+			expectForm: FormA,
+		},
+		{
+			name:       "patch from alpha clears pre-release",
+			input:      "v1.0.0-alpha.3",
+			bumpFunc:   (*Version).BumpPatch,
+			expected:   "v1.0.1",
+			expectForm: FormA,
+		},
+		{
+			name:       "major from beta clears everything",
+			input:      "v1.0.0-beta.6",
+			bumpFunc:   (*Version).BumpMajor,
+			expected:   "v2.0.0",
+			expectForm: FormA,
+		},
+		{
+			name:       "preview from clean version",
+			input:      "v2.0.0",
+			bumpFunc:   (*Version).BumpPreview,
+			expected:   "v2.0.0-preview.1",
+			expectForm: FormF,
+		},
+		{
+			name:       "rc from clean version",
+			input:      "v1.0.0",
+			bumpFunc:   (*Version).BumpRC,
+			expected:   "v1.0.0-rc.1",
+			expectForm: FormD,
+		},
+		{
+			name:       "minor from clean version",
+			input:      "v1.0.0",
+			bumpFunc:   (*Version).BumpMinor,
+			expected:   "v1.1.0",
+			expectForm: FormA,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			v, err := Parse(tc.input)
+			assert.NoError(t, err)
+
+			tc.bumpFunc(v)
+
+			assert.Equal(t, tc.expected, v.String(), "String() output mismatch")
+			assert.Equal(t, tc.expected, v.Format(true), "Format(true) output mismatch")
+			assert.Equal(t, tc.expectForm, v.useForm, "useForm mismatch")
+		})
+	}
+}
+
+// TestBumpWriteAndReparse tests the full round-trip: bump, save, reload, verify.
+// This mirrors what the CLI tests do and catches save/parse interaction bugs.
+func TestBumpWriteAndReparse(t *testing.T) {
+	testCases := []struct {
+		name     string
+		initial  string
+		bumpFunc func(*Version)
+		expected string
+	}{
+		{"alpha from clean", "v1.0.0", (*Version).BumpAlpha, "v1.0.0-alpha.1"},
+		{"alpha from alpha.0", "v1.0.0-alpha.0", (*Version).BumpAlpha, "v1.0.0-alpha.1"},
+		{"beta from clean", "v1.0.0", (*Version).BumpBeta, "v1.0.0-beta.1"},
+		{"patch from alpha", "v1.0.0-alpha.1", (*Version).BumpPatch, "v1.0.1"},
+		{"major from clean", "v1.0.0", (*Version).BumpMajor, "v2.0.0"},
+		{"preview from major", "v2.0.0", (*Version).BumpPreview, "v2.0.0-preview.1"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			path := filepath.Join(tempDir, "VERSION")
+
+			err := os.WriteFile(path, []byte(tc.initial), 0644)
+			assert.NoError(t, err)
+
+			// Load, bump, save
+			v1 := New()
+			err = v1.ParseFile(path)
+			assert.NoError(t, err)
+
+			tc.bumpFunc(v1)
+
+			// Verify formatted output BEFORE saving
+			assert.Equal(t, tc.expected, v1.Format(true),
+				"Format(true) should show new version before save")
+
+			err = v1.Save(path)
+			assert.NoError(t, err)
+
+			// Reload and verify
+			v2 := New()
+			err = v2.ParseFile(path)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, v2.Format(true),
+				"reparsed file should contain new version")
+
+			// Also verify file contents directly
+			contents, err := os.ReadFile(path)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, strings.TrimSpace(string(contents)),
+				"file contents should be new version")
+		})
 	}
 }

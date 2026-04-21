@@ -9,6 +9,7 @@ func (v *Version) BumpMajor() {
 	defer v.mu.Unlock()
 	v.Major++
 	v.Minor, v.Patch, v.RC, v.Alpha, v.Beta, v.Preview = 0, 0, 0, 0, 0, 0
+	v.useForm = FormA
 }
 
 // BumpMinor is responsible for increasing the Minor field in the Version struct
@@ -18,6 +19,7 @@ func (v *Version) BumpMinor() {
 	defer v.mu.Unlock()
 	v.Minor++
 	v.Patch, v.RC, v.Alpha, v.Beta, v.Preview = 0, 0, 0, 0, 0
+	v.useForm = FormA
 }
 
 // BumpPatch is responsible for increasing the Patch field in the Version struct
@@ -61,7 +63,7 @@ func (v *Version) BumpBeta() {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 	v.Beta++
-	v.useForm = FormB
+	v.useForm = FormC
 }
 
 // BumpPreview is responsible for increasing the Preview field in the Version struct

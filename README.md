@@ -6,6 +6,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/andreimerlescu/bump)](https://goreportcard.com/report/github.com/andreimerlescu/bump)
 [![CI](https://github.com/andreimerlescu/bump/actions/workflows/go-bump.yml/badge.svg)](https://github.com/andreimerlescu/bump/actions/workflows/go-bump.yml)
 [![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Unique](https://counthis.app/github?repository=andreimerlescu/bump&label=Unique) ![Visitors](https://counthis.app/g/qyjy5vwjtjgbjfzy)
 
 This package is designed to take a string, like `v1.0.0` and allow you to `bump` it with the command line.
 
